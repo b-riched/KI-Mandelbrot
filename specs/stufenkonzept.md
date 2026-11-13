@@ -232,9 +232,9 @@ Diese Fragen müssen vor der genannten Stufe beantwortet sein.
 | --- | --- |
 | Welche Lizenz bekommt das Repo? Entschieden: MIT. | 0 |
 | Schreibt Claude direkt ins Repo, oder pushen Richard und Thorsten die gelieferten Dateien? Entschieden: per Pull Request. | 0 |
-| Gibt es die Units `MOUSE` und `MOUSEWIN` und die Rohdateien `mandelN.dat` noch? | 1 |
-| In welchem Ordner auf FNSERVER001 liegen Jobs und Ergebnisse, und wie viel Platz ist dort? | 3 |
-| Sollen Arbeiter und Job-Server beim Start des PCs von selbst anlaufen? | 3 |
-| Welche Bildgröße ist der Standard für neue Jobs? | 4 |
+| Gibt es die Units `MOUSE` und `MOUSEWIN` und die Rohdateien `mandelN.dat` noch? Entschieden: MOUSE und MOUSEWIN sind Units aus der Turbo-Pascal 5.5 Bibiliothek. Diese stehen nicht mehr zur Verfügung. | 1 |
+| In welchem Ordner auf FNSERVER001 liegen Jobs und Ergebnisse, und wie viel Platz ist dort? Entschieden: Jobs und Ereignisse bekommen eingene Ordner „_JOBS“ und „_EVENTS“ im Projektordner ../KI-Mandel/ . Die Ordner sind lokal bereits angelegt. | 3 |
+| Sollen Arbeiter und Job-Server beim Start des PCs von selbst anlaufen? Entschieden: Das möge im Job-Handler bitte konfigurierbar sein. | 3 |
+| Welche Bildgröße ist der Standard für neue Jobs? Entschieden: Wenn das Bild ein Elternbild hat, dann das Format des Elternbildes. Ansonsten muss das Format beim Anlegen des Jobs ausgewählt werden. Wurde keines ausgewählt, muss eine Fehlermeldung abgesetzt und der Job darf nicht angelegt werden. | 4 |
 
 **Bewusst ausgeklammert:** native iPad-App, Zugriff von außerhalb des Heimnetzes, Musik im Video, andere Formeln als z² + c, eine C++-Fassung des Rechenkerns. Jeder dieser Punkte braucht eine eigene Stufe mit eigener Spec, bevor daran gebaut wird.
