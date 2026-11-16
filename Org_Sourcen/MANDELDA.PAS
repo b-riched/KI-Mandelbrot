@@ -4,7 +4,7 @@ PROGRAM apfelbaeumchen;
 { -----------    Iteration der Konvergenzwerte   -----------
 
   nach SPEKTRUM DER WISSENSCHAFT, z := zx + i zy, c := cx + i cy,
-  f(z) = zý + c, seite - Kantenl„nge des Grafikfensters, spalt - Entfernung
+  f(z) = zÂ² + c, seite - KantenlÃ¤nge des Grafikfensters, spalt - Entfernung
   zwischen zwei Pixeln, p - Anzahl der Pixel pro Achse
 }
 
@@ -52,7 +52,7 @@ begin
 }
    write(datei,bild);
    writeln;
-   writeln('Programm  "Apfelb„umchen"  (mandelda.pas) l„uft.');
+   writeln('Programm  "ApfelbÃ¤umchen"  (mandelda.pas) lÃ¤uft.');
    writeln;
    seite_x := (xmax-xmin)/p;
    seite_y := (ymax-ymin)/p;
@@ -80,7 +80,7 @@ begin
 end; { mandel }
 
 
-{--------------------------HAUPTPROGRAMM-------------------------------ä-------}
+{--------------------------HAUPTPROGRAMM-------------------------------Ãµ-------}
 
 
 BEGIN

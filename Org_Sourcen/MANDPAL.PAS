@@ -27,7 +27,7 @@ begin
 end;
 
 
-(* AutoDetect-Funktion fÅr den TRI256 Treiber. *)
+(* AutoDetect-Funktion f√ºr den TRI256 Treiber. *)
 
 (*$F+*) function AutoDetectTRI256: integer (*$F-*);
 begin
@@ -53,8 +53,8 @@ begin
     Halt (1)
   end;
 
-  (* Wenn die BGI Treiber Åber RegisterBGIDriver direkt in das Programm *)
-  (* eingebunden werden sollen, so mu· dies an DIESER Stelle erfolgen. *)
+  (* Wenn die BGI Treiber √ºber RegisterBGIDriver direkt in das Programm *)
+  (* eingebunden werden sollen, so mu√ü dies an DIESER Stelle erfolgen. *)
   (* ... anderer Code ... *)
   (* Initialisierung und Umschaltung in den Graphik-Modus, *)
   (* TRI256 Modus 3, 640x480, 256 Farben *)

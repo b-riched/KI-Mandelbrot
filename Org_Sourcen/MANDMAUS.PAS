@@ -1,4 +1,4 @@
-{ Maushandeling f걊 Mandelfa   }
+{ Maushandeling f체r Mandelfa   }
 { Routinen entnommen aus Filer.pas, Tp 5.5 Bibliotheken }
 
 program MandelfarbenPerMaus;
@@ -31,7 +31,7 @@ type
 		B1     : Char;
 		Txt    : String[20];
 	      end;
-			 { Typen f걊 Fensterverwaltung	     }
+			 { Typen f체r Fensterverwaltung	     }
   tScreen   = array[0..79, 0..24] of Word;
   tRScreen  = record
 		Scr    : tScreen;
@@ -57,13 +57,13 @@ const
 	       (X : 0; Y : 0; L : 0; B1 : 'D';
 		Txt : 'rucken'),
 	       (X : 0; Y : 0; L : 0; B1 : 'H';
-		Txt : 'ole Dateianf꼗ge'),
+		Txt : 'ole Dateianf채nge'),
 	       (X : 0; Y : 0; L : 0; B1 : 'K';
 		Txt : 'opieren'),
 	       (X : 0; Y : 0; L : 0; B1 : 'L';
-		Txt : '봲chen'),
+		Txt : '철schen'),
 	       (X : 0; Y : 0; L : 0; B1 : 'M';
-		Txt : 'arken zur갷ksetzen'),
+		Txt : 'arken zur체cksetzen'),
 	       (X : 0; Y : 0; L : 0; B1 : 'P';
 		Txt : 'fad wechseln'),
 	       (X : 0; Y : 0; L : 0; B1 : 'Q';
@@ -76,7 +76,7 @@ const
 var
   Idx,			 { Dateitabellenindex		     }
   IdxMax,		 { Max. Dateitabellenindex	     }
-  Mi,			 { Position f걊 Maus		     }
+  Mi,			 { Position f체r Maus		     }
   DosErr,		 { DosErrorspeicher		     }
   IOr,			 { IOresultspeicher		     }
   PosY, 		 { Position des Cursor am Bildschirm }
@@ -87,13 +87,13 @@ var
   Pfad, 		 { aktueller Pfad		     }
   NeuerPfad,		 { Pfad bei Pfadwechsel 	     }
   SaveDir,		 { Pfad beim Start		     }
-  WinText    : String;	 { Text f걊 Fenster갶erschrift	     }
-  Screen1,		 { Speicher f걊 Bildschirminhalt     }
+  WinText    : String;	 { Text f체r Fenster체berschrift	     }
+  Screen1,		 { Speicher f체r Bildschirminhalt     }
   Screen2,
   Screen3    : tRScrPtr;
   ScreenSeg  : Word;	 { Segmentadresse Bildschirm	     }
   SaveExit   : Pointer;  { TURBOs ExitProzedur		     }
-  KBuffer    : ^tKBuffer;{ Buffer f걊 Dateioperationen	     }
+  KBuffer    : ^tKBuffer;{ Buffer f체r Dateioperationen	     }
   Ende	     : Boolean;  { Programmende 		     }
 
 
@@ -159,7 +159,7 @@ begin
 	  Write(Form[5]);
 	end;
 
-      if WinText <> ''			   { 쉇erschrift ??? }
+      if WinText <> ''			   { 횥berschrift ??? }
 	then
 	  begin
 	    GotoXY(xo + ((xu - xo) -
@@ -232,7 +232,7 @@ end;
 
 procedure AlleMarken;
 
-{ alle Marken zur갷ksetzen }
+{ alle Marken zur체cksetzen }
 begin
   HideMouse;
   for Idx := 1 to IdxMax do
@@ -578,7 +578,7 @@ begin
   until Ende;			     { bis zum bitteren Ende }
 
   HideMouse;
-  RestoreScreen(Screen1);    { alten Bildschirminhalt zur갷k }
+  RestoreScreen(Screen1);    { alten Bildschirminhalt zur체ck }
 
   FreeMem(Screen1,SizeOf(tRScreen));
   FreeMem(Screen2,SizeOf(tRScreen));

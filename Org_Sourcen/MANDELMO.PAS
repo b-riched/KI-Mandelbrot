@@ -1,7 +1,7 @@
 PROGRAM fraktalbebilde;
 
 { z := zx + i zy, c := cx + i cy, f(z) = ,
-  seite - Kantenl„nge des Grafikfensters, spalt - Entfernung
+  seite - KantenlÃ¤nge des Grafikfensters, spalt - Entfernung
   zwischen zwei Pixeln, p - Anzahl der Pixel pro Achse
 }
 
@@ -96,4 +96,3 @@ BEGIN
    closegraph;
 END.
 
-
