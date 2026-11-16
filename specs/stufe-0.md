@@ -1,7 +1,7 @@
 # Spec Stufe 0: Fundament
 
-Status: freigegeben von Thorsten am 12.11.2026. Richard gibt mit der Übernahme des Pull Requests frei.
-Stand: 12.11.2026
+Status: abgenommen am 16.11.2026. Thorsten hat die Spec am 12.11.2026 freigegeben; Richard bestätigt die abgeschlossene Abnahme.
+Stand: 16.11.2026
 Übergeordnet: Stufenkonzept (`specs/stufenkonzept.md`)
 
 ## Ziel
@@ -130,17 +130,23 @@ liegen:
 
 ## Abnahme
 
-- [ ] Die Ordnerstruktur im Repo entspricht Abschnitt 1.
-- [ ] Die Prüfsummen der 11 Originaldateien im Repo stimmen mit
+- [x] Die Ordnerstruktur im Repo entspricht Abschnitt 1.
+- [x] Die Prüfsummen der 11 Originaldateien im Repo stimmen mit
       `docs/pruefsummen.txt` überein (also mit Richards Laufwerk).
-- [ ] Ein frischer Klon unter Windows und einer unter macOS liefern
+- [x] Ein frischer Klon unter Windows und einer unter macOS liefern
       dieselben Prüfsummen.
-- [ ] Jemand liest mit der Formatbeschreibung im README eine `.DAT`-Datei
+- [x] Jemand liest mit der Formatbeschreibung im README eine `.DAT`-Datei
       aus, ohne in den Pascal-Quelltext zu schauen. (Probe: Claude in einer
       frischen Sitzung nur mit dem README.)
-- [ ] Thorsten und Richard haben beide einen Commit ins Repo gebracht.
-- [ ] `LICENSE` liegt im Repo.
-- [ ] Der Stand trägt die Marke `stufe-0`.
+- [x] Thorsten und Richard haben beide einen Commit ins Repo gebracht.
+- [x] `LICENSE` liegt im Repo.
+- [x] Der Stand trägt die Marke `stufe-0`.
+
+Abnahmevermerk: Die sieben Abnahmekriterien sind erfüllt. Die manuellen
+Prüfungen (Prüfsummenvergleich mit den Originalen, frische Klone unter
+Windows und macOS sowie das Einlesen einer `.DAT`-Datei anhand des README)
+wurden bestätigt. Einzelheiten und Beteiligte sind in
+`docs/abnahme-stufe-0.md` dokumentiert.
 
 ## Ergebnis für die nächste Stufe
 
