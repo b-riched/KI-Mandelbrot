@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 .venv/
 ausgabe/
+.pytest_cache/
+*.egg-info/
