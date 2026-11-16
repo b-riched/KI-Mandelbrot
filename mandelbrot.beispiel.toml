@@ -1,0 +1,21 @@
+# Einstellungen für KI-Mandelbrot (Stufe 3).
+#
+# Diese Datei ist eine Vorlage. Wer etwas ändern will, kopiert sie nach
+# mandelbrot.toml und passt die Kopie an. Ohne mandelbrot.toml gelten genau
+# die Werte, die hier stehen.
+
+[ordner]
+# Ordner im Projektordner. Ein Pfad mit Laufwerk (zum Beispiel "D:/Bilder")
+# gilt unverändert.
+jobs = "_JOBS"
+ergebnisse = "_ERGEBNISSE"
+ereignisse = "_EVENTS"
+
+[server]
+# 0.0.0.0 heißt: aus dem ganzen Heimnetz erreichbar.
+adresse = "0.0.0.0"
+port = 8000
+
+[arbeiter]
+# So lange wartet der Arbeiter, wenn kein Job da ist.
+pause_sekunden = 2

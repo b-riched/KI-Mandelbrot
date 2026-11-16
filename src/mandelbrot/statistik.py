@@ -111,3 +111,32 @@ def automatische_schwelle(
         else:
             zu_klein = mitte
     return passend
+
+
+def bilde_farbstufen(
+    roh: np.ndarray,
+    schwelle: int | str,
+    max_bereiche: int = MAX_BEREICHE_STANDARD,
+    grenze: int = ABBRUCHGRENZE,
+):
+    """Der ganze Weg von Abbruchwerten zu Farbstufen.
+
+    schwelle ist eine ganze Zahl ab 0 oder das Wort "auto". Rückgabe:
+    Farbstufen und die Angaben für den Abschnitt "statistik" in lauf.json.
+    """
+    zaehlung = haeufigkeit(roh, grenze)
+    automatisch = schwelle == "auto"
+    if automatisch:
+        pruefe_einstellungen(0, max_bereiche)
+        schwelle = automatische_schwelle(zaehlung, max_bereiche, grenze)
+    pruefe_einstellungen(schwelle, max_bereiche)
+    breiten = bereichsbreiten(zaehlung, schwelle, max_bereiche, grenze)
+    stufen = farbstufen(roh, stufentabelle(breiten))
+    angaben = {
+        "schwelle": schwelle,
+        "schwelle_automatisch": automatisch,
+        "max_bereiche": max_bereiche,
+        "bereiche": len(breiten),
+        "breiten": breiten,
+    }
+    return stufen, angaben

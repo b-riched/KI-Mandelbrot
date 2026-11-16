@@ -127,6 +127,38 @@ Repo eingecheckt. Was die Befehle genau tun, steht in
 [specs/stufe-1-fachlich.md](specs/stufe-1-fachlich.md) und
 [specs/stufe-2a-fachlich.md](specs/stufe-2a-fachlich.md).
 
+### Jobs abarbeiten (Stufe 3, im Aufbau)
+
+Ein Job ist eine Datei im Ordner `_JOBS/neu`. Der Dateiname ohne `.json` ist
+der Name des Jobs. Ein Beispiel für `_JOBS/neu/gesamt.json`:
+
+```json
+{
+  "mitte_x": "-0.75",
+  "mitte_y": "0",
+  "breite": "3.5",
+  "groesse": "fullhd"
+}
+```
+
+Mittelpunkt und Bildbreite stehen in Anführungszeichen, damit keine
+Nachkommastelle verloren geht. Weitere Angaben wie `abbruchgrenze`,
+`palette`, `elternbild` und `serie` stehen in
+[specs/stufe-3-fachlich.md](specs/stufe-3-fachlich.md).
+
+| Befehl | Was er tut |
+| --- | --- |
+| `python -m mandelbrot arbeiter` | Arbeitet die Warteschlange ab, bis Strg+C gedrückt wird. |
+| `python -m mandelbrot arbeiter --einmal` | Rechnet alle wartenden Jobs und endet dann. |
+
+Die Ergebnisse liegen unter `_ERGEBNISSE/<Jobname>/`, gescheiterte Jobs mit
+ihrem Grund unter `_JOBS/fehler/`, das Protokoll unter `_EVENTS/`. Die
+Ordnernamen lassen sich ändern: `mandelbrot.beispiel.toml` nach
+`mandelbrot.toml` kopieren und anpassen.
+
+Der Job-Server für den Zugriff aus dem Heimnetz und der gemeinsame Start
+von Arbeiter und Job-Server fehlen noch.
+
 ### Ein tiefes Bild zur Abnahme von Stufe 2a
 
 Dieser Befehl rechnet ein Bild mit 10⁻¹² Bildbreite in 2560 × 1440. Auf dem
@@ -141,7 +173,9 @@ python -m mandelbrot berechne --mitte-x=-0.743643887037151 --mitte-y=0.131825904
 
 Stufe 0 (Fundament) ist abgenommen. Stufe 1 (Portierung der Pipeline nach
 Python) und Stufe 2a (Bildgrößen und freier Ausschnitt) sind gebaut und
-warten auf die Abnahme. Die Specs liegen in [specs/](specs/).
+warten auf die Abnahme. Von Stufe 3 (Jobs und Server) ist der erste Teil
+gebaut: Jobs, Warteschlange, Arbeiter, Protokoll und Autostart. Der
+Job-Server steht aus. Die Specs liegen in [specs/](specs/).
 
 ## Lizenz
 

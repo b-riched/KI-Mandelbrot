@@ -10,19 +10,17 @@ from pathlib import Path
 
 import numpy as np
 
-from . import __version__, ablage, berechnen
+from . import __version__, ablage, arbeiter, autostart, berechnen, einstellungen
 from .einfaerben import bild
 from .original import LESETABELLE, lies_dat
 from .paletten import ANZAHL_PALETTEN, palette
 from .statistik import (
     MAX_BEREICHE_1991,
     MAX_BEREICHE_STANDARD,
-    automatische_schwelle,
     bereichsbreiten,
-    farbstufen,
+    bilde_farbstufen,
     haeufigkeit,
     pruefe_einstellungen,
-    stufentabelle,
 )
 from .typen import (
     ABBRUCHGRENZE,
@@ -96,22 +94,7 @@ def _statistik(
     roh: np.ndarray, schwelle: int | str, max_bereiche: int, grenze: int = ABBRUCHGRENZE
 ):
     """Bildet Farbstufen und liefert sie mit dem Statistik-Teil für lauf.json."""
-    zaehlung = haeufigkeit(roh, grenze)
-    automatisch = schwelle == "auto"
-    if automatisch:
-        pruefe_einstellungen(0, max_bereiche)
-        schwelle = automatische_schwelle(zaehlung, max_bereiche, grenze)
-    pruefe_einstellungen(schwelle, max_bereiche)
-    breiten = bereichsbreiten(zaehlung, schwelle, max_bereiche, grenze)
-    stufen = farbstufen(roh, stufentabelle(breiten))
-    angaben = {
-        "schwelle": schwelle,
-        "schwelle_automatisch": automatisch,
-        "max_bereiche": max_bereiche,
-        "bereiche": len(breiten),
-        "breiten": breiten,
-    }
-    return stufen, angaben
+    return bilde_farbstufen(roh, schwelle, max_bereiche, grenze)
 
 
 # ----------------------------------------------------------------- Befehle
@@ -363,6 +346,37 @@ def _befehl_vergleiche(args) -> int:
     return 0 if alles_bestanden else 1
 
 
+def _befehl_arbeiter(args) -> int:
+    werte = einstellungen.lade()
+    einstellungen.lege_ordner_an(werte)
+    print(f"Arbeiter läuft. Warteschlange: {werte.ordner_fuer('neu')}")
+    if not args.einmal:
+        print("Beenden mit Strg+C. Ein laufender Job wird beim nächsten Start neu gerechnet.")
+    try:
+        anzahl = arbeiter.arbeite(werte, einmal=args.einmal)
+    except KeyboardInterrupt:
+        print("Arbeiter beendet.")
+        return 0
+    print(f"Arbeiter beendet. Bearbeitete Jobs: {anzahl}")
+    return 0
+
+
+def _befehl_autostart(args) -> int:
+    if args.schalter is None:
+        print("Der Autostart ist " + ("an." if autostart.ist_an() else "aus."))
+    elif args.schalter == "an":
+        ziel = autostart.schalte_an(Path.cwd())
+        print(f"Der Autostart ist an. Angelegt: {ziel}")
+    elif args.schalter == "aus":
+        war_an = autostart.schalte_aus()
+        print("Der Autostart ist aus." if war_an else "Der Autostart war schon aus.")
+    else:
+        raise Eingabefehler(
+            f"Nach autostart steht 'an' oder 'aus', angegeben: '{args.schalter}'"
+        )
+    return 0
+
+
 # ------------------------------------------------------------------ Parser
 
 
@@ -439,6 +453,18 @@ def _parser() -> argparse.ArgumentParser:
         help="vorhandene Vergleichsläufe ersetzen",
     )
     p.set_defaults(funktion=_befehl_vergleiche)
+
+    p = befehle.add_parser("arbeiter", help="die Warteschlange in _JOBS abarbeiten")
+    p.add_argument(
+        "--einmal",
+        action="store_true",
+        help="alle wartenden Jobs abarbeiten und dann enden",
+    )
+    p.set_defaults(funktion=_befehl_arbeiter)
+
+    p = befehle.add_parser("autostart", help="Autostart unter Windows zeigen, an- oder ausschalten")
+    p.add_argument("schalter", metavar="an|aus", nargs="?", help="ohne Angabe: Stand zeigen")
+    p.set_defaults(funktion=_befehl_autostart)
     return parser
 
 
