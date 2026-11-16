@@ -84,17 +84,53 @@ Daten sind aber vollständig lesbar.
 | `Org_Daten/` | Originaldaten von 1991, unverändert |
 | `Org_Sourcen/` | Originalquellen von 1990/91, unverändert |
 | `specs/` | Stufenkonzept und eine Spec pro Stufe |
-| `src/mandelbrot/` | Python-Code, ab Stufe 1 |
-| `tests/` | Tests, ab Stufe 1 |
+| `src/mandelbrot/` | Python-Code |
+| `tests/` | Tests |
 | `docs/` | Bilder und Prüfsummen der Originale |
+
+## Einrichtung
+
+Gebraucht wird Python 3.12 oder neuer. Auf Windows im Ordner des Repos:
+
+```powershell
+py -3.12 -m venv .venv
+.venv\Scripts\python -m pip install -r requirements.txt
+.venv\Scripts\python -m pytest
+```
+
+Auf macOS oder Linux:
+
+```bash
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m pytest
+```
+
+Der letzte Befehl lässt alle Tests laufen. Das dauert etwa eine halbe Minute.
+
+## Benutzung
+
+Alle Befehle werden im Ordner des Repos aufgerufen. Auf Windows steht
+`.venv\Scripts\python` an der Stelle von `python`, auf macOS und Linux
+`.venv/bin/python`.
+
+| Befehl | Was er tut |
+| --- | --- |
+| `python -m mandelbrot original Org_Daten/M0.DAT --palette 1` | Liest eine Originaldatei und gibt sie als PNG aus. |
+| `python -m mandelbrot berechne --xmin=-2.1 --xmax=0.6 --ymin=-1.35 --ymax=1.35 --name gesamt` | Rechnet einen Ausschnitt neu. |
+| `python -m mandelbrot faerbe ausgabe/gesamt --palette 2 --name gesamt-rot` | Färbt einen Lauf neu ein, ohne neu zu rechnen. |
+| `python -m mandelbrot vergleiche` | Rechnet alle fünf Originale nach und meldet die Übereinstimmung. |
+
+Die Ergebnisse liegen unter `ausgabe/<Name>/`. Dieser Ordner wird nicht ins
+Repo eingecheckt. Was die Befehle genau tun, steht in
+[specs/stufe-1-fachlich.md](specs/stufe-1-fachlich.md).
 
 ## Stand
 
-Stufe 0 (Fundament) ist in Arbeit, siehe [specs/stufe-0.md](specs/stufe-0.md).
-Als Nächstes folgt Stufe 1, die Portierung der Pipeline nach Python.
-
-Vorgesehen ist Python 3.12. Die Abhängigkeiten für Stufe 1 stehen in
-`requirements.txt`.
+Stufe 0 (Fundament) ist abgenommen. Stufe 1 (Portierung der Pipeline nach
+Python) ist gebaut und wartet auf die Abnahme, siehe
+[specs/stufe-1-fachlich.md](specs/stufe-1-fachlich.md) und
+[specs/stufe-1-technisch.md](specs/stufe-1-technisch.md).
 
 ## Lizenz
 
