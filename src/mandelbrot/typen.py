@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -11,6 +12,16 @@ import numpy as np
 RASTER = 480
 ABBRUCHGRENZE = 1005
 WERT_IN_MENGE = 1006
+
+# Stufe 2a: benannte Bildgrößen und Grenzen für Eingaben (R9, R12)
+GROESSEN = {
+    "hd": (1280, 720),
+    "fullhd": (1920, 1080),
+    "wqhd": (2560, 1440),
+    "ipad": (2360, 1640),
+}
+SEITE_MIN, SEITE_MAX = 16, 10_000
+GRENZE_MIN, GRENZE_MAX = 10, 1_000_000
 
 
 class Eingabefehler(ValueError):
@@ -70,11 +81,76 @@ class Ausschnitt:
         }
 
 
+def lies_groesse(text: str) -> tuple[int, int]:
+    """Liest eine Bildgröße: einen Namen aus GROESSEN oder BREITExHÖHE (R9)."""
+    roh = str(text).strip().lower().replace("×", "x")
+    if roh in GROESSEN:
+        return GROESSEN[roh]
+    treffer = re.fullmatch(r"(\d+)\s*x\s*(\d+)", roh)
+    if not treffer:
+        raise Eingabefehler(
+            f"Die Bildgröße '{text}' ist unbekannt. Möglich sind "
+            + ", ".join(GROESSEN)
+            + " oder eine Angabe wie 800x600."
+        )
+    breite, hoehe = int(treffer.group(1)), int(treffer.group(2))
+    for name, seite in (("Breite", breite), ("Höhe", hoehe)):
+        if not SEITE_MIN <= seite <= SEITE_MAX:
+            raise Eingabefehler(
+                f"Die {name} des Bildes muss zwischen {SEITE_MIN} und {SEITE_MAX} "
+                f"Bildpunkten liegen, angegeben: {seite}"
+            )
+    return breite, hoehe
+
+
+def pruefe_abbruchgrenze(grenze: int) -> int:
+    if not GRENZE_MIN <= grenze <= GRENZE_MAX:
+        raise Eingabefehler(
+            f"Die Abbruchgrenze muss zwischen {GRENZE_MIN} und {GRENZE_MAX} liegen, "
+            f"angegeben: {grenze}"
+        )
+    return grenze
+
+
+@dataclass(frozen=True)
+class Bildausschnitt:
+    """Ein Bild, beschrieben durch Mittelpunkt, Bildbreite und Bildgröße (R10)."""
+
+    mitte_x: Decimal
+    mitte_y: Decimal
+    breite: Decimal  # Bildbreite in der Zahlenebene, größer als 0
+    pixel_b: int  # Breite in Bildpunkten
+    pixel_h: int  # Höhe in Bildpunkten
+
+    @classmethod
+    def aus_text(cls, mitte_x: str, mitte_y: str, breite: str, groesse: str) -> Bildausschnitt:
+        pixel_b, pixel_h = lies_groesse(groesse)
+        bild = cls(
+            dezimal(mitte_x, "Der Mittelpunkt x"),
+            dezimal(mitte_y, "Der Mittelpunkt y"),
+            dezimal(breite, "Die Bildbreite"),
+            pixel_b,
+            pixel_h,
+        )
+        if not bild.breite > 0:
+            raise Eingabefehler(f"Die Bildbreite muss größer als 0 sein, angegeben: {breite}")
+        return bild
+
+    def als_text(self) -> dict[str, str]:
+        return {
+            "mitte_x": dezimaltext(self.mitte_x),
+            "mitte_y": dezimaltext(self.mitte_y),
+            "breite": dezimaltext(self.breite),
+            "lage": "aufrecht",
+        }
+
+
 @dataclass(frozen=True)
 class Lauf:
-    """Ein gelesener Lauf-Ordner (R8)."""
+    """Ein gelesener Lauf-Ordner (R8, R16)."""
 
     ordner: Path
     beschreibung: dict
     stufen: np.ndarray
     roh: np.ndarray | None
+    glatt: np.ndarray | None = None

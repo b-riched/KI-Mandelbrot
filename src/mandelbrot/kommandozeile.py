@@ -24,7 +24,13 @@ from .statistik import (
     pruefe_einstellungen,
     stufentabelle,
 )
-from .typen import Ausschnitt, Eingabefehler
+from .typen import (
+    ABBRUCHGRENZE,
+    Ausschnitt,
+    Bildausschnitt,
+    Eingabefehler,
+    pruefe_abbruchgrenze,
+)
 from .vergleich import vergleiche, vergleichsbild
 
 PALETTE_STANDARD = 1
@@ -86,15 +92,17 @@ def _prozent(anteil: float) -> str:
 # --------------------------------------------------------------- Statistik
 
 
-def _statistik(roh: np.ndarray, schwelle: int | str, max_bereiche: int):
+def _statistik(
+    roh: np.ndarray, schwelle: int | str, max_bereiche: int, grenze: int = ABBRUCHGRENZE
+):
     """Bildet Farbstufen und liefert sie mit dem Statistik-Teil für lauf.json."""
-    zaehlung = haeufigkeit(roh)
+    zaehlung = haeufigkeit(roh, grenze)
     automatisch = schwelle == "auto"
     if automatisch:
         pruefe_einstellungen(0, max_bereiche)
-        schwelle = automatische_schwelle(zaehlung, max_bereiche)
+        schwelle = automatische_schwelle(zaehlung, max_bereiche, grenze)
     pruefe_einstellungen(schwelle, max_bereiche)
-    breiten = bereichsbreiten(zaehlung, schwelle, max_bereiche)
+    breiten = bereichsbreiten(zaehlung, schwelle, max_bereiche, grenze)
     stufen = farbstufen(roh, stufentabelle(breiten))
     angaben = {
         "schwelle": schwelle,
@@ -133,13 +141,43 @@ def _befehl_original(args) -> int:
     return 0
 
 
+_FORM_1991 = ("xmin", "xmax", "ymin", "ymax")
+_FORM_NEU = ("mitte_x", "mitte_y", "breite", "groesse")
+
+
+def _optionen(namen) -> str:
+    return ", ".join("--" + name.replace("_", "-") for name in namen)
+
+
 def _befehl_berechne(args) -> int:
-    fehlend = [
-        f"--{n}" for n in ("xmin", "xmax", "ymin", "ymax") if getattr(args, n) is None
-    ]
+    wie_1991 = [n for n in _FORM_1991 if getattr(args, n) is not None]
+    neu = [n for n in _FORM_NEU if getattr(args, n) is not None]
+    if wie_1991 and neu:
+        raise Eingabefehler(
+            "Bitte nur eine Form benutzen: entweder "
+            f"{_optionen(_FORM_1991)} oder {_optionen(_FORM_NEU)}. "
+            f"Angegeben sind {_optionen(wie_1991 + neu)}"
+        )
+    if not wie_1991 and not neu:
+        raise Eingabefehler(
+            f"Es fehlt der Ausschnitt: entweder {_optionen(_FORM_1991)} "
+            f"oder {_optionen(_FORM_NEU)}"
+        )
+    form, vorhanden = (_FORM_NEU, neu) if neu else (_FORM_1991, wie_1991)
+    fehlend = [n for n in form if n not in vorhanden]
     if fehlend:
-        raise Eingabefehler("Es fehlt: " + ", ".join(fehlend))
-    ausschnitt = Ausschnitt.aus_text(args.xmin, args.xmax, args.ymin, args.ymax)
+        raise Eingabefehler("Es fehlt: " + _optionen(fehlend))
+
+    grenze = ABBRUCHGRENZE
+    if args.abbruchgrenze is not None:
+        grenze = pruefe_abbruchgrenze(_ganze_zahl(args.abbruchgrenze, "Die Abbruchgrenze"))
+    if neu:
+        gegenstand = Bildausschnitt.aus_text(
+            args.mitte_x, args.mitte_y, args.breite, args.groesse
+        )
+        berechnen.pruefe_genauigkeit(gegenstand)  # Fehler nach R15 vor der Rechnung
+    else:
+        gegenstand = Ausschnitt.aus_text(args.xmin, args.xmax, args.ymin, args.ymax)
     nummer = _palette(args.palette, PALETTE_STANDARD)
     schwelle = _schwelle(args.schwelle or "auto")
     max_bereiche = (
@@ -151,9 +189,15 @@ def _befehl_berechne(args) -> int:
     ordner = _lauf_ordner(args.name or _zeitname())
     _pruefe_frei(ordner, args.ueberschreiben)
 
-    roh = berechnen.abbruchwerte(ausschnitt)
-    stufen, statistik = _statistik(roh, schwelle, max_bereiche)
-    angaben = ablage.beschreibung("berechnet", ausschnitt, nummer)
+    if neu:
+        roh, glatt, warnungen = berechnen.berechne_bild(gegenstand, grenze)
+        for warnung in warnungen:
+            print(f"Warnung: {warnung}", file=sys.stderr)
+    else:
+        # Die Form wie 1991 bleibt wie in Stufe 1, ohne gebrochene Abbruchwerte.
+        roh, glatt = berechnen.abbruchwerte(gegenstand, grenze=grenze), None
+    stufen, statistik = _statistik(roh, schwelle, max_bereiche, grenze)
+    angaben = ablage.beschreibung("berechnet", gegenstand, nummer, grenze)
     angaben["statistik"] = statistik
     ablage.schreibe_lauf(
         ordner,
@@ -161,11 +205,14 @@ def _befehl_berechne(args) -> int:
         stufen=stufen,
         bild=bild(stufen, palette(nummer)),
         roh=roh,
+        glatt=glatt,
         ueberschreiben=args.ueberschreiben,
     )
+    groesse = f"{roh.shape[0]} x {roh.shape[1]}"
     print(
-        f"Berechnet: Schwelle {statistik['schwelle']}, "
-        f"{statistik['bereiche']} Bereiche, Palette {nummer}."
+        f"Berechnet: {groesse} Bildpunkte, Abbruchgrenze {grenze}, "
+        f"Schwelle {statistik['schwelle']}, {statistik['bereiche']} Bereiche, "
+        f"Palette {nummer}."
     )
     print(f"Lauf: {ordner}")
     return 0
@@ -178,7 +225,10 @@ def _befehl_faerbe(args) -> int:
     ordner = _lauf_ordner(args.name or _zeitname())
     _pruefe_frei(ordner, args.ueberschreiben)
 
-    angaben = ablage.beschreibung("neu eingefärbt", ablage.ausschnitt_aus(alt), nummer)
+    grenze = alt.get("abbruchgrenze", ABBRUCHGRENZE)
+    angaben = ablage.beschreibung(
+        "neu eingefärbt", ablage.gegenstand_aus(alt), nummer, grenze
+    )
     angaben["aus_lauf"] = quelle.ordner.name
     for schluessel in ("quelldatei", "faktor", "ausschnitt_kopfzeile"):
         if schluessel in alt:
@@ -204,7 +254,7 @@ def _befehl_faerbe(args) -> int:
             max_bereiche = _ganze_zahl(args.max_bereiche, "Die Höchstzahl der Bereiche")
         else:
             max_bereiche = alte_statistik.get("max_bereiche", MAX_BEREICHE_STANDARD)
-        stufen, statistik = _statistik(quelle.roh, schwelle, max_bereiche)
+        stufen, statistik = _statistik(quelle.roh, schwelle, max_bereiche, grenze)
         angaben["statistik"] = statistik
 
     ablage.schreibe_lauf(
@@ -213,6 +263,7 @@ def _befehl_faerbe(args) -> int:
         stufen=stufen,
         bild=bild(stufen, palette(nummer)),
         roh=quelle.roh,
+        glatt=quelle.glatt,
         ueberschreiben=args.ueberschreiben,
     )
     print(f"Neu eingefärbt aus '{quelle.ordner.name}', Palette {nummer}.")
@@ -364,7 +415,12 @@ def _parser() -> argparse.ArgumentParser:
 
     p = befehle.add_parser("berechne", help="einen Ausschnitt neu rechnen")
     for seite in ("xmin", "xmax", "ymin", "ymax"):
-        p.add_argument(f"--{seite}", help="Dezimalzahl, zum Beispiel --xmin=-2.1")
+        p.add_argument(f"--{seite}", help="Form wie 1991: Dezimalzahl, zum Beispiel --xmin=-2.1")
+    p.add_argument("--mitte-x", help="neue Form: Mittelpunkt, zum Beispiel --mitte-x=-0.75")
+    p.add_argument("--mitte-y", help="neue Form: Mittelpunkt, zum Beispiel --mitte-y=0")
+    p.add_argument("--breite", help="neue Form: Bildbreite in der Zahlenebene")
+    p.add_argument("--groesse", help="neue Form: hd, fullhd, wqhd, ipad oder BREITExHÖHE")
+    p.add_argument("--abbruchgrenze", help="10 bis 1000000, Standard 1005")
     gemeinsam(p, mit_statistik=True)
     p.set_defaults(funktion=_befehl_berechne)
 

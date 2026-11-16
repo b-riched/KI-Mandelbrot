@@ -106,7 +106,7 @@ python3.12 -m venv .venv
 .venv/bin/python -m pytest
 ```
 
-Der letzte Befehl lässt alle Tests laufen. Das dauert etwa eine halbe Minute.
+Der letzte Befehl lässt alle Tests laufen. Das dauert etwa eine Minute.
 
 ## Benutzung
 
@@ -117,20 +117,31 @@ Alle Befehle werden im Ordner des Repos aufgerufen. Auf Windows steht
 | Befehl | Was er tut |
 | --- | --- |
 | `python -m mandelbrot original Org_Daten/M0.DAT --palette 1` | Liest eine Originaldatei und gibt sie als PNG aus. |
-| `python -m mandelbrot berechne --xmin=-2.1 --xmax=0.6 --ymin=-1.35 --ymax=1.35 --name gesamt` | Rechnet einen Ausschnitt neu. |
+| `python -m mandelbrot berechne --mitte-x=-0.75 --mitte-y=0 --breite=3.5 --groesse fullhd --name gesamt-hd` | Rechnet ein Bild in wählbarer Größe: `hd`, `fullhd`, `wqhd`, `ipad` oder zum Beispiel `800x600`. Mit `--abbruchgrenze` lässt sich die Zahl der Rechenschritte ändern. |
+| `python -m mandelbrot berechne --xmin=-2.1 --xmax=0.6 --ymin=-1.35 --ymax=1.35 --name gesamt` | Rechnet einen Ausschnitt wie 1991, in 480 × 480. |
 | `python -m mandelbrot faerbe ausgabe/gesamt --palette 2 --name gesamt-rot` | Färbt einen Lauf neu ein, ohne neu zu rechnen. |
 | `python -m mandelbrot vergleiche` | Rechnet alle fünf Originale nach und meldet die Übereinstimmung. |
 
 Die Ergebnisse liegen unter `ausgabe/<Name>/`. Dieser Ordner wird nicht ins
 Repo eingecheckt. Was die Befehle genau tun, steht in
-[specs/stufe-1-fachlich.md](specs/stufe-1-fachlich.md).
+[specs/stufe-1-fachlich.md](specs/stufe-1-fachlich.md) und
+[specs/stufe-2a-fachlich.md](specs/stufe-2a-fachlich.md).
+
+### Ein tiefes Bild zur Abnahme von Stufe 2a
+
+Dieser Befehl rechnet ein Bild mit 10⁻¹² Bildbreite in 2560 × 1440. Auf dem
+Prozessor dauert das etwa eine Minute. Die Warnung zur Rechengenauigkeit ist
+dabei erwartet.
+
+```
+python -m mandelbrot berechne --mitte-x=-0.743643887037151 --mitte-y=0.131825904205330 --breite=0.000000000001 --groesse wqhd --abbruchgrenze 5000 --name tief
+```
 
 ## Stand
 
 Stufe 0 (Fundament) ist abgenommen. Stufe 1 (Portierung der Pipeline nach
-Python) ist gebaut und wartet auf die Abnahme, siehe
-[specs/stufe-1-fachlich.md](specs/stufe-1-fachlich.md) und
-[specs/stufe-1-technisch.md](specs/stufe-1-technisch.md).
+Python) und Stufe 2a (Bildgrößen und freier Ausschnitt) sind gebaut und
+warten auf die Abnahme. Die Specs liegen in [specs/](specs/).
 
 ## Lizenz
 

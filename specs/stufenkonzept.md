@@ -6,6 +6,8 @@ Stand: 12.11.2026 · Thorsten
 
 Jede Stufe wird erst spezifiziert, dann gebaut, dann abgenommen. Die nächste Stufe beginnt erst nach der Abnahme der vorigen.
 
+Ausnahme seit dem 16.11.2026: Eine Stufe darf spezifiziert und gebaut werden, bevor die vorige abgenommen ist. In `main` kommt sie erst nach deren Abnahme. Ändert die Abnahme etwas an der vorigen Stufe, wird die spätere nachgezogen.
+
 Dieses Dokument ist das Dach über allen Stufen. Es legt fest, was jede Stufe liefert und woran wir erkennen, dass sie fertig ist. Die Detail-Spec einer Stufe entsteht erst, wenn sie an der Reihe ist.
 
 Ablauf pro Stufe:
@@ -38,20 +40,23 @@ Diese Punkte sind entschieden und gelten für alle Stufen. Wer einen davon ände
 
 ## Stufenübersicht
 
-Acht Stufen, jede mit einem vorzeigbaren Ergebnis. Nach Stufe 4 ist Richards Kreislauf von 1991 wieder geschlossen: rechnen, ansehen, Ausschnitt wählen, neu rechnen.
+Neun Stufen, jede mit einem vorzeigbaren Ergebnis. Nach Stufe 4 ist Richards Kreislauf von 1991 wieder geschlossen: rechnen, ansehen, Ausschnitt wählen, neu rechnen.
 
 | Stufe | Name | Ergebnis | Baut auf |
 | --- | --- | --- | --- |
 | 0 | Fundament | Repo-Struktur steht, Originale sind geschützt und dokumentiert | – |
 | 1 | Portierung | Richards Pipeline läuft in Python und erzeugt PNG wie 1991 | 0 |
-| 2 | GPU und Bildgrößen | Berechnung auf der Grafikkarte, Bildgröße und Abbruchgrenze frei wählbar | 1 |
-| 3 | Jobs und Server | Jobs liegen als Dateien auf dem Server, der PC arbeitet sie ab | 2 |
+| 2a | Bildgrößen | Bildgröße, Abbruchgrenze und Ausschnitt per Mittelpunkt frei wählbar, auf dem Prozessor | 1 |
+| 2b | Grafikkarte | Dieselbe Rechnung auf der Grafikkarte | 2a |
+| 3 | Jobs und Server | Jobs liegen als Dateien auf dem Server, der PC arbeitet sie ab | 2a |
 | 4 | Web-App | Bilder ansehen und Ausschnitt wählen auf PC und iPad | 3 |
-| 5 | Farben und Relief | 24-Bit-Farbverläufe, Höhenlinien, Relief | 2 |
+| 5 | Farben und Relief | 24-Bit-Farbverläufe, Höhenlinien, Relief | 2a |
 | 6 | Videos | Zoomfahrt hinein oder heraus als MP4 | 3 und 5 |
-| 7 | Tiefe Zooms | Bildbreiten kleiner als 10⁻¹² | 2 |
+| 7 | Tiefe Zooms | Bildbreiten kleiner als 10⁻¹² | 2b |
 
-Stufe 5 braucht nur die Rohdaten aus Stufe 2. Sie kann deshalb vor Stufe 3 und 4 gezogen werden, wenn Richard früh schöne Bilder sehen will.
+Stufe 2 ist seit dem 16.11.2026 geteilt, weil nur der Teil mit der Grafikkarte Richards Rechner braucht. So können Stufe 2a und Stufe 3 gebaut werden, bevor die Grafikkarte an der Reihe ist.
+
+Stufe 5 braucht nur die Rohdaten aus Stufe 2a. Sie kann deshalb vor Stufe 3 und 4 gezogen werden, wenn Richard früh schöne Bilder sehen will.
 
 ## Stufe 0: Fundament
 
@@ -99,26 +104,41 @@ Stufe 5 braucht nur die Rohdaten aus Stufe 2. Sie kann deshalb vor Stufe 3 und 4
 
 Die Abweichung bei `M11` kommt vermutlich von den gerundeten Koordinaten in der alten Kopfzeile, nicht von der Rechnung.
 
-## Stufe 2: GPU und Bildgrößen
+## Stufe 2a: Bildgrößen und freier Ausschnitt
 
-**Ziel:** Der Rechenkern läuft auf der RTX 3080 Ti, und Bildgröße und Abbruchgrenze sind frei wählbar.
+**Ziel:** Bildgröße, Abbruchgrenze und Ausschnitt sind frei wählbar. Gerechnet wird auf dem Prozessor.
 
 **Umfang**
 
-- Rechenschleife mit Numba-CUDA in doppelter Genauigkeit.
 - Ein Ausschnitt wird durch Mittelpunkt und Bildbreite beschrieben. Die Bildhöhe ergibt sich aus dem Seitenverhältnis, die Bildpunkte bleiben quadratisch.
 - Bildgrößen 1280 × 720, 1920 × 1080, 2560 × 1440 und 2360 × 1640, dazu jede frei gewählte Größe.
 - Abbruchgrenze als Parameter.
 - Zusätzlich zu den ganzen Abbruchwerten werden gebrochene Abbruchwerte gespeichert. Sie sind die Grundlage für stufenlose Farben in Stufe 5.
-- Derselbe Aufruf rechnet auf dem Prozessor, wenn keine Grafikkarte da ist.
 - Warnung, wenn die Bildbreite unter 10⁻¹² liegt.
 
-**Nicht in dieser Stufe:** Störungsrechnung, Jobs, Farben. Die CuPy-Variante wird nur gebaut, wenn Numba an eine Grenze stößt.
+**Nicht in dieser Stufe:** Grafikkarte, Störungsrechnung, Jobs, Farben.
+
+**Abnahme**
+
+- [ ] Je ein Bild in den vier benannten Größen und in einer freien Größe ist gerechnet.
+- [ ] Alle Tests aus Stufe 1 laufen unverändert durch.
+- [ ] Ein Bild mit 10⁻¹² Bildbreite in 2560 × 1440 zeigt keine Klötzchen.
+- [ ] Alle Abnahmekriterien sind erfüllt aus `specs/stufe-2a-fachlich.md`.
+
+## Stufe 2b: Grafikkarte
+
+**Ziel:** Der Rechenkern läuft auf der RTX 3080 Ti und liefert dasselbe wie der Prozessor.
+
+**Umfang**
+
+- Rechenschleife mit Numba-CUDA in doppelter Genauigkeit.
+- Derselbe Aufruf rechnet auf dem Prozessor, wenn keine Grafikkarte da ist.
+
+**Nicht in dieser Stufe:** Störungsrechnung. Die CuPy-Variante wird nur gebaut, wenn Numba an eine Grenze stößt.
 
 **Abnahme**
 
 - [ ] Grafikkarte und Prozessor liefern für denselben Ausschnitt in mindestens 99,9 % der Punkte denselben ganzen Abbruchwert.
-- [ ] Ein Bild mit 10⁻¹² Bildbreite in 2560 × 1440 zeigt keine Klötzchen.
 - [ ] Die Rechenzeiten für die vier Bildgrößen sind auf Richards PC gemessen und in der Spec eingetragen.
 - [ ] Die Installation auf Richards PC ist als Schrittfolge im README beschrieben und einmal von ihm durchgespielt.
 
