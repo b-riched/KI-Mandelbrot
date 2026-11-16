@@ -149,7 +149,7 @@ Die Abweichung bei `M11` kommt vermutlich von den gerundeten Koordinaten in der 
 **Umfang**
 
 - **Job-Format** als JSON: Name, Mittelpunkt und Bildbreite als Dezimaltext, Bildgröße, Abbruchgrenze, Palette, Elternbild und Serie.
-- **Ordner auf dem Server:** `jobs/neu`, `jobs/laeuft`, `jobs/fertig`, `jobs/fehler` und `ergebnisse/<Jobname>/` mit Rohdaten, PNG und Metadaten.
+- **Ordner auf dem Server:** `_JOBS/neu`, `_JOBS/laeuft`, `_JOBS/fertig`, `_JOBS/fehler`, dazu `_ERGEBNISSE/<Jobname>/` mit Rohdaten, PNG und Metadaten und `_EVENTS` für das Protokoll.
 - **Arbeiter** auf dem PC: holt den ältesten Job aus `jobs/neu`, rechnet, färbt ein, legt das Ergebnis ab.
 - **Job-Server** auf dem PC: Job anlegen, Jobs mit Status auflisten, Bilder und Metadaten ausliefern.
 
@@ -157,10 +157,11 @@ Die Abweichung bei `M11` kommt vermutlich von den gerundeten Koordinaten in der 
 
 **Abnahme**
 
-- [ ] Eine von Hand in `jobs/neu` gelegte Job-Datei wird gerechnet, und das Ergebnis liegt im Ergebnisordner.
-- [ ] Ein fehlerhafter Job landet mit lesbarer Meldung in `jobs/fehler`, und die Warteschlange läuft weiter.
+- [ ] Eine von Hand in `_JOBS/neu` gelegte Job-Datei wird gerechnet, und das Ergebnis liegt im Ergebnisordner.
+- [ ] Ein fehlerhafter Job landet mit lesbarer Meldung in `_JOBS/fehler`, und die Warteschlange läuft weiter.
 - [ ] Nach einem Neustart des PCs mitten in einem Job wird dieser Job neu gerechnet und geht nicht verloren.
 - [ ] Vom iPad aus lässt sich über die Adresse des PCs im Heimnetz ein Job anlegen und sein Status abfragen.
+- [ ] Alle Abnahmekriterien sind erfüllt aus `specs/stufe-3-fachlich.md`.
 
 ## Stufe 4: Web-App
 
@@ -253,7 +254,7 @@ Diese Fragen müssen vor der genannten Stufe beantwortet sein.
 | Welche Lizenz bekommt das Repo? Entschieden: MIT. | 0 |
 | Schreibt Claude direkt ins Repo, oder pushen Richard und Thorsten die gelieferten Dateien? Entschieden: per Pull Request. | 0 |
 | Gibt es die Units `MOUSE` und `MOUSEWIN` und die Rohdateien `mandelN.dat` noch? Entschieden: MOUSE und MOUSEWIN sind Units aus der Turbo-Pascal 5.5 Bibiliothek. Diese stehen nicht mehr zur Verfügung. | 1 |
-| In welchem Ordner auf FNSERVER001 liegen Jobs und Ergebnisse, und wie viel Platz ist dort? Entschieden: Jobs und Ereignisse bekommen eingene Ordner „_JOBS“ und „_EVENTS“ im Projektordner ../KI-Mandel/ . Die Ordner sind lokal bereits angelegt. | 3 |
+| In welchem Ordner auf FNSERVER001 liegen Jobs und Ergebnisse, und wie viel Platz ist dort? Entschieden: Jobs und Ereignisse bekommen eingene Ordner „_JOBS“ und „_EVENTS“ im Projektordner ../KI-Mandel/ . Die Ordner sind lokal bereits angelegt. Geklärt am 16.11.2026: `_EVENTS` ist für das Protokoll. Wo die Ergebnisse liegen, entscheidet die Spec für Stufe 3 (Vorschlag: `_ERGEBNISSE`). | 3 |
 | Sollen Arbeiter und Job-Server beim Start des PCs von selbst anlaufen? Entschieden: Das möge im Job-Handler bitte konfigurierbar sein. | 3 |
 | Welche Bildgröße ist der Standard für neue Jobs? Entschieden: Wenn das Bild ein Elternbild hat, dann das Format des Elternbildes. Ansonsten muss das Format beim Anlegen des Jobs ausgewählt werden. Wurde keines ausgewählt, muss eine Fehlermeldung abgesetzt und der Job darf nicht angelegt werden. | 4 |
 
