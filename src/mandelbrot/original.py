@@ -60,6 +60,13 @@ def lies_dat(pfad: str | Path, faktor: int | None = None) -> OriginalBild:
         )
     name = pfad.name.upper()
     regel = LESETABELLE.get(name)
+    if regel is not None and faktor is not None:
+        # Korrektur F-01 aus der Abnahme von Stufe 1: Der Faktor einer Datei
+        # der Lesetabelle steht fest und lässt sich nicht überschreiben.
+        raise Eingabefehler(
+            f"{pfad.name} steht in der Lesetabelle, der Faktor {regel.faktor} ist fest. "
+            "Die Angabe --faktor gilt nur für Dateien, die nicht in der Lesetabelle stehen."
+        )
     if faktor is None:
         if regel is None:
             raise Eingabefehler(

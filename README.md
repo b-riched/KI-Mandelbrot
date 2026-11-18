@@ -82,7 +82,7 @@ Daten sind aber vollständig lesbar.
 | Ordner | Inhalt |
 | --- | --- |
 | `Org_Daten/` | Originaldaten von 1991, unverändert |
-| `Org_Sourcen/` | Originalquellen von 1990/91, unverändert |
+| `Org_Sourcen/` | Originalquellen von 1990/91. Vier Dateien (`MANDELDA`, `MANDELMO`, `MANDMAUS`, `MANDPAL`) sind seit dem 16.11.2026 nach UTF-8 umkodiert, damit die Umlaute lesbar sind. Die Fassungen von 1991 liegen im Commit `af67afa`. |
 | `specs/` | Stufenkonzept und eine Spec pro Stufe |
 | `src/mandelbrot/` | Python-Code |
 | `tests/` | Tests |
