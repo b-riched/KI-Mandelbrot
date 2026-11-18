@@ -1,7 +1,7 @@
 # Stufe 3: Jobs und Server – fachliche Spec
 
-Status: freigegeben von Thorsten am 16.11.2026. Richard gibt mit der Übernahme des Pull Requests frei.
-Stand: 16.11.2026
+Status: freigegeben von Thorsten am 16.11.2026. Richard hat die Entscheidungen H1 bis H6 am 18.11.2026 freigegeben.
+Stand: 18.11.2026
 Übergeordnet: [Stufenkonzept](stufenkonzept.md)
 Gegenstück: [technische Spec](stufe-3-technisch.md)
 Baut auf: [Stufe 2a](stufe-2a-fachlich.md)
@@ -180,9 +180,10 @@ Zeitpunkt, Jobname, Ereignis und einen kurzen Text. Festgehalten werden:
 
 ## Entscheidungen
 
-Thorsten hat am 16.11.2026 alle sechs Vorschläge übernommen. H1 sollte
-Richard noch bestätigen. Der Ordner der Ergebnisse ist einstellbar, eine
-andere Wahl braucht also keinen Umbau.
+Thorsten hat am 16.11.2026 alle sechs Vorschläge übernommen. Richard hat
+die Entscheidungen H1 bis H6 am 18.11.2026 freigegeben. Damit ist auch H1
+bestätigt, das bis dahin offen war. Der Ordner der Ergebnisse bleibt
+einstellbar.
 
 | Nr. | Frage | Entschieden wie vorgeschlagen |
 | --- | --- | --- |

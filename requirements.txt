@@ -1,4 +1,7 @@
 numpy
 pillow
+fastapi
+uvicorn
+httpx
 pytest
 -e .

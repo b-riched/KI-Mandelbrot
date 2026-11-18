@@ -1,7 +1,7 @@
 # Stufe 3: Jobs und Server – technische Spec
 
 Status: freigegeben von Thorsten am 16.11.2026. Richard gibt mit der Übernahme des Pull Requests frei.
-Stand: 16.11.2026. Teil A ist gebaut, Teil B steht aus, siehe „Stand des Baus"
+Stand: 18.11.2026. Teil A und Teil B sind gebaut, siehe „Stand des Baus"
 Übergeordnet: [Stufenkonzept](stufenkonzept.md)
 Gegenstück: [fachliche Spec](stufe-3-fachlich.md)
 Baut auf: [technische Spec Stufe 2a](stufe-2a-technisch.md)
@@ -272,16 +272,17 @@ Windows gibt.
 
 ## Stand des Baus
 
-Stufe 3 wird in zwei Teilen gebaut, weil in der Bauumgebung `fastapi` fehlt
-(Punkt T6).
+Stufe 3 ist in zwei Teilen gebaut, weil in der Bauumgebung zunächst
+`fastapi` fehlte (Punkt T6).
 
 | Teil | Inhalt | Stand |
 | --- | --- | --- |
 | A | `einstellungen`, `jobs`, `warteschlange`, `protokoll`, `arbeiter`, `autostart`, Befehle `arbeiter` und `autostart`, die Tests dazu | gebaut und getestet am 16.11.2026 |
-| B | `server`, Befehle `server` und `start`, `test_server`, `test_abnahme_3`, neue Abhängigkeiten in `requirements.txt` | steht aus |
+| B | `server`, Befehle `server` und `start`, `test_server`, `test_abnahme_3`, neue Abhängigkeiten in `requirements.txt` | gebaut und getestet am 18.11.2026 |
 
-Solange Teil B fehlt, ruft die Autostart-Datei einen Befehl auf, den es
-noch nicht gibt. Stufe 3 kommt deshalb erst mit Teil B nach `main`.
+Mit Teil B gibt es den Befehl `start`, den die Autostart-Datei aufruft.
+Stufe 3 kann damit nach `main`. Auf Richards PC noch zu prüfen: C4 (iPad),
+C7 (Autostart) und die Punkte T7 und T8.
 
 ### Präzisierungen beim Bauen von Teil A
 
@@ -300,6 +301,45 @@ noch nicht gibt. Stufe 3 kommt deshalb erst mit Teil B nach `main`.
 6. Dazugekommen sind `tests/stufe3.py` mit Hilfen für die Tests und
    `tests/test_einstellungen.py`.
 
+### Präzisierungen beim Bauen von Teil B
+
+1. Jede Fehlermeldung des Job-Servers hat die Form `{"fehler": "..."}`,
+   auch bei einer unbekannten Adresse (404) und einem nicht vorgesehenen
+   Aufruf (405). Eine Anfrage, die kein JSON in geschweiften Klammern ist,
+   wird mit 400 abgewiesen.
+2. Ein Name in einer Adresse, der ein nicht erlaubtes Zeichen enthält, wird
+   mit 400 abgewiesen. 404 heißt: Der Name ist erlaubt, aber es gibt ihn
+   nicht.
+3. Ein Job in der Antwort hat die Felder `name`, `stand`, `angelegt` und
+   `angaben`, bei gescheiterten Jobs dazu `fehler` und bei fertigen
+   `ergebnis` mit der Adresse des Ergebnisses. `fehler` ist der Grund aus
+   `<Jobname>.fehler.txt` ohne die Fehlerspur. Ist eine von Hand abgelegte
+   Datei nicht lesbar, ist `angaben` leer (`null`).
+4. Ein Ergebnis in der Liste hat die Felder `name`, `raster` (Breite und
+   Höhe wie in `lauf.json`), `elternbild`, `serie`, `zeitpunkt` und `bild`.
+   `zeitpunkt` ist das Ende der Rechnung.
+5. `GET /api/zustand` liefert `programm`, `jobs` (Zahl je Stand),
+   `ergebnisse`, `arbeiter_aktiv` und `laufender_job`.
+6. `POST /api/jobs` weist das Feld `angelegt` ab, weil der Job-Server es
+   selbst einträgt. Ein Jobname darf nicht auf `.teil` enden, weil solche
+   Ordner beim Start des Arbeiters gelöscht werden.
+7. Der Job-Server prüft das Elternbild schon beim Anlegen. Ein Ausschnitt
+   lässt sich deshalb erst anlegen, wenn sein Elternbild fertig gerechnet
+   ist. `test_abnahme_3` lässt den Arbeiter darum zweimal laufen. Der
+   fehlerhafte Job, den der Arbeiter dort in `fehler` ablegt, liegt von
+   Hand in der Warteschlange. Über den Job-Server käme er nicht hinein.
+8. `start` schickt dem Arbeiter am Ende das Zeichen für Strg+C und wartet
+   fünf Sekunden. Läuft er dann noch, wird er hart beendet. Unter Windows
+   erreicht Strg+C den Arbeiter von selbst, weil beide im selben Fenster
+   laufen.
+9. Kann der Job-Server nicht starten, etwa weil der Port belegt ist, endet
+   der Befehl mit einer Meldung und dem Rückgabewert 1. `start` beendet
+   dann auch den Arbeiter.
+10. Die Testseite `/docs` lädt ihre Bedienelemente aus dem Internet. Das
+    Gerät, das sie öffnet, braucht also eine Internetverbindung. Die
+    Aufrufe unter `/api` brauchen keine.
+11. Die Programmversion ist 0.3.0.
+
 Eine bekannte Grenze: Wird der Arbeiter hart beendet, etwa durch
 Stromausfall, steht im Lebenszeichen weiter der laufende Job. Der
 Job-Server meldet den Arbeiter dann als aktiv, bis er neu gestartet wird.
@@ -317,6 +357,6 @@ Job-Server meldet den Arbeiter dann als aktiv, bis er neu gestartet wird.
 
 | Nr. | Frage | Vorschlag |
 | --- | --- | --- |
-| T6 | In der Bauumgebung fehlen `fastapi` und `httpx`, und Installationen sind dort gesperrt. | Thorsten erlaubt Paketinstallationen. Bis das wirkt, lassen sich Jobs, Warteschlange, Arbeiter, Protokoll und Autostart bauen und testen, der Job-Server nicht. |
-| T7 | Fragt die Windows-Firewall beim ersten Start des Job-Servers nach? | Vermutlich ja. Richard erlaubt den Zugriff für private Netze. Der Schritt kommt ins README. |
+| T6 | In der Bauumgebung fehlen `fastapi` und `httpx`, und Installationen sind dort gesperrt. | Erledigt am 18.11.2026: Die Pakete lassen sich installieren, Teil B ist damit gebaut und getestet. |
+| T7 | Fragt die Windows-Firewall beim ersten Start des Job-Servers nach? | Vermutlich ja. Richard erlaubt den Zugriff für private Netze. Der Schritt steht im README. Auf Richards PC prüfen. |
 | T8 | Ist das Laufwerk X: beim Anmelden schon verbunden, wenn der Autostart läuft? | Die Autostart-Datei wartet, bis der Projektordner erreichbar ist. Auf Richards PC prüfen. |
