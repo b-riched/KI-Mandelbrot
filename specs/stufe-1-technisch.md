@@ -476,6 +476,18 @@ Die fachliche Spec ist davon nicht berührt.
 
 Dazu kommen `.pytest_cache/` und `*.egg-info/` in `.gitignore`.
 
+## Korrektur nach der Abnahme
+
+Richards Abnahmebericht vom 18.11.2026 (`specs/abnahme-stufe-1.md`) nennt
+die Auffälligkeit F-01: Die Option `--faktor` überschrieb auch bei den fünf
+Dateien der Lesetabelle den Faktor, obwohl die Hilfe sie nur für unbekannte
+Dateien vorsieht.
+
+Korrigiert am 18.11.2026: `lies_dat` lehnt einen angegebenen Faktor bei
+einer Datei der Lesetabelle mit einer Fehlermeldung ab, auch wenn er mit
+dem Faktor der Tabelle übereinstimmt. Der Befehl `original` gibt dann den
+Rückgabewert 2 zurück. Nachweis: `tests/test_korrektur_f01.py`.
+
 ## Nicht in dieser Stufe
 
 - Numba, CUDA und jede andere Beschleunigung.

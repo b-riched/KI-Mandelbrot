@@ -35,7 +35,8 @@ Diese Punkte sind entschieden und gelten für alle Stufen. Wer einen davon ände
 | Zoomtiefe Stufen 1 bis 6 | Bis etwa 10⁻¹² Bildbreite. Tiefer erst in Stufe 7. |
 | Ausgabeformate | Bilder als PNG, Videos als MP4, Metadaten als JSON. |
 | Koordinaten | Als Dezimaltext mit beliebig vielen Stellen, nie als gerundete Zahl. |
-| Originale | `Org_Daten` und `Org_Sourcen` bleiben unverändert im Repo. |
+| Originale | `Org_Daten` bleibt unverändert im Repo. In `Org_Sourcen` sind vier Dateien seit dem 16.11.2026 nach UTF-8 umkodiert, damit die Umlaute lesbar sind. Das bleibt so (Entscheidung vom 18.11.2026). Die Fassungen von 1991 liegen im Commit `af67afa`. |
+| Nachweis der Abnahme | Jede abgenommene Stufe bekommt die Marke `stufe-N` auf dem geprüften Stand (bestätigt am 18.11.2026). Ein Branch reicht nicht, weil er weiterwandert. |
 | Repo | [b-riched/KI-Mandelbrot](https://github.com/b-riched/KI-Mandelbrot) |
 
 ## Stufenübersicht

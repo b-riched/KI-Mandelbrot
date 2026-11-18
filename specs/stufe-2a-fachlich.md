@@ -169,7 +169,9 @@ Abbruchwerte wie Stufe 1.
 ## Entscheidungen
 
 Thorsten hat am 16.11.2026 alle fünf Vorschläge übernommen. So ist Stufe 2a
-gebaut. Richard kann im Pull Request widersprechen, dann wird nachgebaut.
+gebaut. Richard hat sie am 18.11.2026 nach seinen Tests freigegeben. Offen
+sind noch B5 (das tiefe Bild ansehen), B8 (Rechenzeiten auf Richards PC)
+und B9 (Marke).
 
 | Nr. | Frage | Entschieden wie vorgeschlagen |
 | --- | --- | --- |
