@@ -1,0 +1,21 @@
+Es wurde ein Bild mit folgenden Parametern erzeugt: 
+
+   mitte-x 	 = -0.743643887037151
+   mitte-y 	 =  0.131825904205330
+   breite  	 =  0.000000000001
+   groesse 	 =  wqhd
+   abbruchgrenze = 5000
+   
+Das PNG wurde per default mit Palette 1 eingefärbt. 
+
+Test: 
+	Sichtprüfung auf Klötzchenartefakte
+
+Ergebnis: 
+	Es wurden keine Klötzchenartefakte gesichtet. 
+	Allerdings ist aufgrund der Colorierung durch die Palette 1 der Randbereich 
+	um die Mandelbrotmenge wegen einer zu groben Farbzuordnung farblich (gelb) 
+	zugelaufen. Wenn hier Klötchen auftreten sollten, sind sie nicht zu sehen.
+
+Der Test gilt zunächst als bestanden. 
+Eine Nachprüfung muss erfolgen, wenn in den folgenden Stufen die Colorierung neu implementiert wird. 
