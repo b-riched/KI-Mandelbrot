@@ -258,16 +258,18 @@ der mit Stufe 2a ins README kommt, und von Richard angesehen.
 
 Gemessen auf dem Prozessor mit der Ansicht der ganzen Menge (Mittelpunkt
 −0,75 / 0, Bildbreite 3,5) und Abbruchgrenze 1005. Die Spalte „beim Bauen"
-stammt aus der Bauumgebung am 16.11.2026. Der Test `test_abnahme_2a` misst
+stammt aus der Bauumgebung am 16.11.2026. Die Spalte „Richards PC" hat
+Richard am 18.11.2026 gemessen
+(`docs/abnahme-stufe-2a--rechenzeiten.txt`). Der Test `test_abnahme_2a` misst
 die Zeiten bei jedem Lauf neu und schreibt sie nach
 `ausgabe/abnahme-b1/rechenzeiten.txt`.
 
 | Bildgröße | Voranalyse | Gemessen beim Bauen | Richards PC |
 | --- | --- | --- | --- |
-| `hd` 1280 × 720 | 1,1 s | 1,4 s | |
-| `fullhd` 1920 × 1080 | | 3,3 s | |
-| `wqhd` 2560 × 1440 | 4,7 s | 6,6 s | |
-| `ipad` 2360 × 1640 | | 5,3 s | |
+| `hd` 1280 × 720 | 1,1 s | 1,4 s | 1,1 s |
+| `fullhd` 1920 × 1080 | | 3,3 s | 2,4 s |
+| `wqhd` 2560 × 1440 | 4,7 s | 6,6 s | 4,5 s |
+| `ipad` 2360 × 1640 | | 5,3 s | 3,6 s |
 
 Das tiefe Bild für B5 (10⁻¹² Bildbreite, 2560 × 1440, Abbruchgrenze 5000)
 brauchte beim Bauen 57 Sekunden. In den Abbruchwerten gibt es keine zwei

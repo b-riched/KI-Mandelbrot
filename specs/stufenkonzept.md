@@ -207,6 +207,7 @@ Die Abweichung bei `M11` kommt vermutlich von den gerundeten Koordinaten in der 
 - [ ] In ruhigen Bildbereichen sind keine Farbstufen zu sehen.
 - [ ] Höhenlinien und Relief lassen sich einzeln ein- und ausschalten.
 - [ ] Richard hat mindestens drei Verläufe als Standard ausgewählt.
+- [ ] Das tiefe Bild aus Stufe 2a (B5) ist mit den neuen Farben noch einmal angesehen: keine Klötzchen, auch nicht am Rand der Menge.
 
 ## Stufe 6: Videos
 
