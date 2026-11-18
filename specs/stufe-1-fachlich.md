@@ -240,7 +240,7 @@ sich, was 1991 tatsächlich eingestellt war.
 ## Entscheidungen
 
 Thorsten hat am 16.11.2026 alle sechs Vorschläge übernommen. So ist Stufe 1
-gebaut. Richard kann im Pull Request widersprechen, dann wird nachgebaut.
+gebaut. Richard hat sie am 18.11.2026 nach seinen Tests freigegeben.
 
 | Nr. | Frage | Entschieden wie vorgeschlagen |
 | --- | --- | --- |
