@@ -1,13 +1,14 @@
 # Stufe 3: Jobs und Server – technische Spec
 
 Status: freigegeben von Thorsten am 16.11.2026. Richard gibt mit der Übernahme des Pull Requests frei.
-Stand: 18.11.2026. Teil A und Teil B sind gebaut, siehe „Stand des Baus"
+Stand: 23.11.2026. Teil A und Teil B sind gebaut, Teil C ist ein Entwurf, siehe „Stand des Baus"
 Übergeordnet: [Stufenkonzept](stufenkonzept.md)
 Gegenstück: [fachliche Spec](stufe-3-fachlich.md)
 Baut auf: [technische Spec Stufe 2a](stufe-2a-technisch.md)
 
-Die Regeln R17 bis R26 und die Abnahmekriterien C1 bis C9 stehen in der
-fachlichen Spec.
+Die Regeln R17 bis R27 und die Abnahmekriterien C1 bis C10 stehen in der
+fachlichen Spec. Was Teil C ändert, steht gesammelt unter „Teil C:
+geplante Jobs".
 
 ## Rahmen
 
@@ -269,6 +270,7 @@ Windows gibt.
 | C7 | nur auf Richards PC prüfbar |
 | C8 | `python -m pytest` |
 | C9 | `git tag stufe-3` nach der Abnahme |
+| C10 | `test_arbeiter`, `test_server`, `test_abnahme_3`, dazu einmal über die Testseite auf Richards PC |
 
 ## Stand des Baus
 
@@ -279,10 +281,11 @@ Stufe 3 ist in zwei Teilen gebaut, weil in der Bauumgebung zunächst
 | --- | --- | --- |
 | A | `einstellungen`, `jobs`, `warteschlange`, `protokoll`, `arbeiter`, `autostart`, Befehle `arbeiter` und `autostart`, die Tests dazu | gebaut und getestet am 16.11.2026 |
 | B | `server`, Befehle `server` und `start`, `test_server`, `test_abnahme_3`, neue Abhängigkeiten in `requirements.txt` | gebaut und getestet am 18.11.2026 |
+| C | Stand `geplant` und Freigabe (R27), siehe „Teil C: geplante Jobs" | Spec liegt vor (23.11.2026), Freigabe von H7 bis H9 steht aus |
 
 Mit Teil B gibt es den Befehl `start`, den die Autostart-Datei aufruft.
-Stufe 3 kann damit nach `main`. Auf Richards PC noch zu prüfen: C4 (iPad),
-C7 (Autostart) und die Punkte T7 und T8.
+Stufe 3 kommt nach `main`, wenn auch Teil C gebaut ist. Auf Richards PC
+noch zu prüfen: C4 (iPad), C7 (Autostart), C10 und die Punkte T7 und T8.
 
 ### Präzisierungen beim Bauen von Teil A
 
@@ -343,6 +346,83 @@ C7 (Autostart) und die Punkte T7 und T8.
 Eine bekannte Grenze: Wird der Arbeiter hart beendet, etwa durch
 Stromausfall, steht im Lebenszeichen weiter der laufende Job. Der
 Job-Server meldet den Arbeiter dann als aktiv, bis er neu gestartet wird.
+
+## Teil C: geplante Jobs (R27)
+
+Entwurf vom 23.11.2026, gebaut wird nach der Freigabe von H7 bis H9. Teil C
+kommt auf denselben Branch `stufe-3-jobs`.
+
+### Ordner und Einstellungen
+
+- `einstellungen.STAENDE` wird zu `("geplant", "neu", "laeuft", "fertig",
+  "fehler")`. `lege_ordner_an` legt damit auch `_JOBS/geplant` an.
+- Ein Jobname ist vergeben, wenn es in einem der fünf Ordner eine Datei
+  `<Jobname>.json` gibt oder in `_ERGEBNISSE` einen Ordner dieses Namens.
+- Arbeiter, `naechster` und `raeume_auf` lesen weiter nur `neu` und
+  `laeuft`. Für `geplant` ändert sich dort nichts.
+
+### Job-Datei
+
+- Neues Feld `freigegeben` mit dem Zeitpunkt der Freigabe. Wie `angelegt`
+  trägt es der Job-Server ein. `jobs.FELDER` nimmt es auf.
+- `POST /api/jobs` weist `freigegeben` ab wie `angelegt`.
+- `geplant` steht nur in der Anfrage, wie `name`. In der Datei ist es
+  nicht erlaubt, weil der Ordner den Stand angibt.
+
+### Reihenfolge (H8)
+
+`warteschlange.naechster` sortiert nach `freigegeben`, ersatzweise nach
+`angelegt`, ersatzweise nach dem Änderungsdatum der Datei, bei Gleichstand
+nach dem Namen. Aus `angelegt_am` wird dafür `eingereiht_am`.
+
+### Job-Server
+
+| Aufruf | Zweck | Antwort |
+| --- | --- | --- |
+| `POST /api/jobs` | wie bisher, dazu freiwillig `"geplant": true` (H7) | 201 mit dem Job und `"stand": "geplant"` oder `"neu"`. 400, wenn `geplant` kein `true` oder `false` ist. |
+| `POST /api/jobs/{name}/freigeben` | geplanten Job freigeben (R27) | 200 mit dem Job im Stand `neu`. 400 mit dem Grund, wenn die Prüfung scheitert; der Job bleibt dann in `geplant`. 404, wenn es den Job nicht gibt. 409, wenn er nicht in `geplant` liegt, mit seinem Stand in der Meldung. |
+| `GET /api/jobs?stand=geplant` | geplante Jobs | Liste |
+| `GET /api/zustand` | wie bisher | `jobs` zählt zusätzlich `geplant` |
+
+Ablauf der Freigabe, unter derselben Sperre wie das Anlegen:
+
+1. Datei aus `geplant` lesen und mit `jobs.pruefe` prüfen.
+2. `freigegeben` eintragen und die Datei mit `jobs.schreibe` an derselben
+   Stelle neu schreiben. Das geschieht über `.teil` in einem Schritt.
+3. Datei mit `os.replace` nach `neu` verschieben.
+4. Ereignis `freigegeben` ins Protokoll.
+
+Weil die Datei in Schritt 2 neu geschrieben wird, ist sie in `neu` jünger
+als zwei Sekunden. Der Arbeiter wartet sie also ab wie jede neue Datei.
+
+Der Job-Server schreibt damit in `_JOBS/geplant`, `_JOBS/neu` und ins
+Protokoll. Die Regel „schreibt nur in `_JOBS/neu`" aus Teil B wird so
+erweitert.
+
+### Protokoll
+
+- Neues Ereignis `freigegeben`.
+- Beim Anlegen nach `geplant` steht im Text von `angelegt`: „über den
+  Job-Server, geplant".
+
+### Tests
+
+| Test | Prüft | Kriterium |
+| --- | --- | --- |
+| `test_warteschlange` | Reihenfolge nach `freigegeben`, `geplant` zählt bei vergebenen Namen, `naechster` und `raeume_auf` lassen `geplant` liegen | R20, R27 |
+| `test_jobs` | `freigegeben` ist erlaubt, `geplant` in der Datei nicht | R18 |
+| `test_arbeiter` | ein Job in `geplant` wird nicht gerechnet, auch nicht nach Neustart | R27, C10 |
+| `test_server` | Anlegen mit und ohne `geplant`, falscher Wert für `geplant`, Freigabe mit Erfolg, mit gescheiterter Prüfung, für unbekannten Job und für jeden anderen Stand, Zustand mit `geplant`, Protokoll | R24, R27, C10 |
+| `test_abnahme_3` | zusätzlich ein geplanter Job: Er bleibt nach `arbeiter --einmal` liegen, wird freigegeben und beim zweiten Lauf gerechnet | C10 |
+
+Tests aus Teil A und B werden nur dort angepasst, wo sie die Zahl der
+Stände festschreiben, etwa die Antwort von `/api/zustand`. Tests aus den
+Stufen 1 und 2a bleiben unverändert (C8).
+
+### Dokumentation
+
+README und Bedienungsanleitung bekommen einen Absatz zu geplanten Jobs und
+zur Freigabe über die Testseite.
 
 ## Nicht in dieser Stufe
 
