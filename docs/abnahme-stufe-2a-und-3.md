@@ -88,6 +88,8 @@ Es wurden keine fehlgeschlagenen Tests ausgewiesen.
 
 **Stufe 3:** Teilabnahme. Zwei zentrale manuelle Abläufe – erfolgreicher Job und Fehlerfall mit Fortsetzung durch einen weiteren Job – sind nun ausdrücklich geprüft und bestanden. Auch die automatisierte Testsuite ist mit 547 bestandenen Tests grün. Die übrigen Integrations-/Systemprüfungen und die Git-Marke `stufe-3` sind noch offen.
 
+Die Implementierung der nächsten Stufe wird freigegeben. 
+
 ## 6. Verwendete Nachweise
 
 - `specs/stufe-2a-fachlich.md`
