@@ -1,3 +1,30 @@
 Org_Daten/**    binary
 Org_Sourcen/**  -text
 docs/pruefsummen.txt text eol=lf
+
+# Implementierungsstufe 3
+
+# Spezifikation
+/specs/stufe-3-fachlich.md stufe=3
+/specs/stufe-3-technisch.md stufe=3
+
+# Implementierung
+/mandelbrot.beispiel.toml stufe=3
+/src/mandelbrot/arbeiter.py stufe=3
+/src/mandelbrot/autostart.py stufe=3
+/src/mandelbrot/einstellungen.py stufe=3
+/src/mandelbrot/jobs.py stufe=3
+/src/mandelbrot/protokoll.py stufe=3
+/src/mandelbrot/server.py stufe=3
+/src/mandelbrot/warteschlange.py stufe=3
+
+# Test und Abnahme
+/tests/stufe3.py stufe=3
+/tests/test_abnahme_3.py stufe=3
+/tests/test_arbeiter.py stufe=3
+/tests/test_autostart.py stufe=3
+/tests/test_einstellungen.py stufe=3
+/tests/test_jobs.py stufe=3
+/tests/test_protokoll.py stufe=3
+/tests/test_server.py stufe=3
+/tests/test_warteschlange.py stufe=3

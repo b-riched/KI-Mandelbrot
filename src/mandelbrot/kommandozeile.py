@@ -1,28 +1,29 @@
-"""Die Befehle original, berechne, faerbe und vergleiche."""
+"""Die Befehle original, berechne, faerbe, vergleiche, arbeiter, server, start und autostart."""
 
 from __future__ import annotations
 
 import argparse
 import re
+import signal
+import socket
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 
 import numpy as np
 
-from . import __version__, ablage, berechnen
+from . import __version__, ablage, arbeiter, autostart, berechnen, einstellungen
 from .einfaerben import bild
 from .original import LESETABELLE, lies_dat
 from .paletten import ANZAHL_PALETTEN, palette
 from .statistik import (
     MAX_BEREICHE_1991,
     MAX_BEREICHE_STANDARD,
-    automatische_schwelle,
     bereichsbreiten,
-    farbstufen,
+    bilde_farbstufen,
     haeufigkeit,
     pruefe_einstellungen,
-    stufentabelle,
 )
 from .typen import (
     ABBRUCHGRENZE,
@@ -96,22 +97,7 @@ def _statistik(
     roh: np.ndarray, schwelle: int | str, max_bereiche: int, grenze: int = ABBRUCHGRENZE
 ):
     """Bildet Farbstufen und liefert sie mit dem Statistik-Teil für lauf.json."""
-    zaehlung = haeufigkeit(roh, grenze)
-    automatisch = schwelle == "auto"
-    if automatisch:
-        pruefe_einstellungen(0, max_bereiche)
-        schwelle = automatische_schwelle(zaehlung, max_bereiche, grenze)
-    pruefe_einstellungen(schwelle, max_bereiche)
-    breiten = bereichsbreiten(zaehlung, schwelle, max_bereiche, grenze)
-    stufen = farbstufen(roh, stufentabelle(breiten))
-    angaben = {
-        "schwelle": schwelle,
-        "schwelle_automatisch": automatisch,
-        "max_bereiche": max_bereiche,
-        "bereiche": len(breiten),
-        "breiten": breiten,
-    }
-    return stufen, angaben
+    return bilde_farbstufen(roh, schwelle, max_bereiche, grenze)
 
 
 # ----------------------------------------------------------------- Befehle
@@ -363,6 +349,115 @@ def _befehl_vergleiche(args) -> int:
     return 0 if alles_bestanden else 1
 
 
+def _befehl_arbeiter(args) -> int:
+    werte = einstellungen.lade()
+    einstellungen.lege_ordner_an(werte)
+    print(f"Arbeiter läuft. Warteschlange: {werte.ordner_fuer('neu')}")
+    if not args.einmal:
+        print("Beenden mit Strg+C. Ein laufender Job wird beim nächsten Start neu gerechnet.")
+    try:
+        anzahl = arbeiter.arbeite(werte, einmal=args.einmal)
+    except KeyboardInterrupt:
+        print("Arbeiter beendet.")
+        return 0
+    print(f"Arbeiter beendet. Bearbeitete Jobs: {anzahl}")
+    return 0
+
+
+def _netzadressen() -> list[str]:
+    """Die Adressen dieses PCs im Heimnetz, soweit sie sich ermitteln lassen."""
+    adressen = []
+    try:  # Die Adresse, über die der PC andere Geräte erreicht. Gesendet wird dabei nichts.
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as verbindung:
+            verbindung.connect(("192.0.2.1", 9))
+            adressen.append(verbindung.getsockname()[0])
+    except OSError:
+        pass
+    try:
+        adressen += socket.gethostbyname_ex(socket.gethostname())[2]
+    except OSError:
+        pass
+    return list(dict.fromkeys(a for a in adressen if not a.startswith(("127.", "0."))))
+
+
+def _starte_server(werte) -> int:
+    """Lässt den Job-Server laufen, bis Strg+C gedrückt wird."""
+    try:
+        import uvicorn
+
+        from . import server
+    except ImportError as fehler:
+        raise Eingabefehler(
+            f"Für den Job-Server fehlt ein Paket ({fehler.name}). Bitte einmal "
+            "'python -m pip install -r requirements.txt' aufrufen."
+        ) from None
+    einstellungen.lege_ordner_an(werte)
+    print(f"Job-Server startet auf Port {werte.port}. Beenden mit Strg+C.")
+    print(f"Testseite an diesem PC:  http://localhost:{werte.port}/docs")
+    if werte.adresse in ("0.0.0.0", "::"):
+        for adresse in _netzadressen():
+            print(f"Testseite im Heimnetz:   http://{adresse}:{werte.port}/docs")
+    else:
+        print(f"Der Job-Server hört nur auf die Adresse {werte.adresse}.")
+    sys.stdout.flush()
+    try:
+        uvicorn.run(
+            server.erzeuge_app(werte), host=werte.adresse, port=werte.port, log_level="warning"
+        )
+    except KeyboardInterrupt:
+        pass
+    except SystemExit:  # so meldet uvicorn, dass es nicht starten konnte
+        print(
+            f"Fehler: Der Job-Server konnte nicht starten. Vermutlich ist der Port "
+            f"{werte.port} schon belegt, zum Beispiel durch einen zweiten Job-Server.",
+            file=sys.stderr,
+        )
+        return 1
+    print("Job-Server beendet.")
+    return 0
+
+
+def _befehl_server(args) -> int:
+    return _starte_server(einstellungen.lade())
+
+
+def _beende_arbeiter(prozess) -> None:
+    """Beendet den Arbeiter. Ein laufender Job wird beim nächsten Start neu gerechnet (R23)."""
+    if prozess.poll() is None and not sys.platform.startswith("win"):
+        prozess.send_signal(signal.SIGINT)  # unter Windows hat ihn Strg+C schon erreicht
+    try:
+        prozess.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        prozess.terminate()
+        prozess.wait()
+
+
+def _befehl_start(args) -> int:
+    werte = einstellungen.lade()
+    einstellungen.lege_ordner_an(werte)
+    prozess = subprocess.Popen([sys.executable, "-m", "mandelbrot", "arbeiter"])
+    try:
+        return _starte_server(werte)
+    finally:
+        _beende_arbeiter(prozess)
+
+
+def _befehl_autostart(args) -> int:
+    if args.schalter is None:
+        print("Der Autostart ist " + ("an." if autostart.ist_an() else "aus."))
+    elif args.schalter == "an":
+        ziel = autostart.schalte_an(Path.cwd())
+        print(f"Der Autostart ist an. Angelegt: {ziel}")
+    elif args.schalter == "aus":
+        war_an = autostart.schalte_aus()
+        print("Der Autostart ist aus." if war_an else "Der Autostart war schon aus.")
+    else:
+        raise Eingabefehler(
+            f"Nach autostart steht 'an' oder 'aus', angegeben: '{args.schalter}'"
+        )
+    return 0
+
+
 # ------------------------------------------------------------------ Parser
 
 
@@ -439,6 +534,24 @@ def _parser() -> argparse.ArgumentParser:
         help="vorhandene Vergleichsläufe ersetzen",
     )
     p.set_defaults(funktion=_befehl_vergleiche)
+
+    p = befehle.add_parser("arbeiter", help="die Warteschlange in _JOBS abarbeiten")
+    p.add_argument(
+        "--einmal",
+        action="store_true",
+        help="alle wartenden Jobs abarbeiten und dann enden",
+    )
+    p.set_defaults(funktion=_befehl_arbeiter)
+
+    p = befehle.add_parser("server", help="den Job-Server für das Heimnetz starten")
+    p.set_defaults(funktion=_befehl_server)
+
+    p = befehle.add_parser("start", help="Arbeiter und Job-Server zusammen starten")
+    p.set_defaults(funktion=_befehl_start)
+
+    p = befehle.add_parser("autostart", help="Autostart unter Windows zeigen, an- oder ausschalten")
+    p.add_argument("schalter", metavar="an|aus", nargs="?", help="ohne Angabe: Stand zeigen")
+    p.set_defaults(funktion=_befehl_autostart)
     return parser
 
 

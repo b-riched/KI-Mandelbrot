@@ -169,9 +169,15 @@ Abbruchwerte wie Stufe 1.
 ## Entscheidungen
 
 Thorsten hat am 16.11.2026 alle fünf Vorschläge übernommen. So ist Stufe 2a
-gebaut. Richard hat sie am 18.11.2026 nach seinen Tests freigegeben. Offen
-sind noch B5 (das tiefe Bild ansehen), B8 (Rechenzeiten auf Richards PC)
-und B9 (Marke).
+gebaut. Richard hat sie am 18.11.2026 nach seinen Tests freigegeben. Am selben
+Tag hat er das tiefe Bild angesehen (B5) und die Rechenzeiten gemessen (B8).
+Seine Nachweise liegen in `docs/abnahme-stufe-2a--tiefenbild.txt` und
+`docs/abnahme-stufe-2a--rechenzeiten.txt`.
+
+Zu B5 hat Richard einen Vorbehalt festgehalten: Im Bild sind keine Klötzchen
+zu sehen. Der Rand um die Menge ist mit Palette 1 aber gelb zugelaufen, dort
+wären Klötzchen nicht zu erkennen. B5 gilt als bestanden. Das Bild wird in
+Stufe 5 mit den neuen Farben noch einmal angesehen.
 
 | Nr. | Frage | Entschieden wie vorgeschlagen |
 | --- | --- | --- |
@@ -183,21 +189,21 @@ und B9 (Marke).
 
 ## Abnahme
 
-- [ ] **B1** Je ein Bild in `hd`, `fullhd`, `wqhd` und `ipad` und eines in
+- [x] **B1** Je ein Bild in `hd`, `fullhd`, `wqhd` und `ipad` und eines in
       einer frei gewählten Größe ist gerechnet. Jedes PNG hat genau die
       verlangte Größe.
-- [ ] **B2** Der Mittelpunkt liegt in der Bildmitte, die Bildpunkte sind
+- [x] **B2** Der Mittelpunkt liegt in der Bildmitte, die Bildpunkte sind
       quadratisch, und das Bild steht aufrecht.
-- [ ] **B3** Alle Tests aus Stufe 1 laufen unverändert durch. Die
+- [x] **B3** Alle Tests aus Stufe 1 laufen unverändert durch. Die
       Übereinstimmung mit den fünf Originalen ist dieselbe wie in Stufe 1.
-- [ ] **B4** Ein Bild mit Abbruchgrenze 5000 ist gerechnet. Die Breiten der
+- [x] **B4** Ein Bild mit Abbruchgrenze 5000 ist gerechnet. Die Breiten der
       Bereiche ergeben zusammen 5000.
-- [ ] **B5** Ein Bild mit 10⁻¹² Bildbreite in 2560 × 1440 ist gerechnet.
+- [x] **B5** Ein Bild mit 10⁻¹² Bildbreite in 2560 × 1440 ist gerechnet.
       Richard sieht es an: keine Klötzchen.
-- [ ] **B6** Warnung und Fehler nach R15 erscheinen an den richtigen
+- [x] **B6** Warnung und Fehler nach R15 erscheinen an den richtigen
       Stellen.
-- [ ] **B7** Zu jedem neuen Lauf gibt es gebrochene Abbruchwerte.
-- [ ] **B8** Die Rechenzeiten für die vier benannten Größen sind gemessen
+- [x] **B7** Zu jedem neuen Lauf gibt es gebrochene Abbruchwerte.
+- [x] **B8** Die Rechenzeiten für die vier benannten Größen sind gemessen
       und in der technischen Spec eingetragen.
 - [ ] **B9** Der Stand trägt die Marke `stufe-2a`.
 

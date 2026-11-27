@@ -127,6 +127,60 @@ Repo eingecheckt. Was die Befehle genau tun, steht in
 [specs/stufe-1-fachlich.md](specs/stufe-1-fachlich.md) und
 [specs/stufe-2a-fachlich.md](specs/stufe-2a-fachlich.md).
 
+### Jobs und Job-Server (Stufe 3)
+
+Ein Job ist eine Datei im Ordner `_JOBS/neu`. Der Dateiname ohne `.json` ist
+der Name des Jobs. Ein Beispiel für `_JOBS/neu/gesamt.json`:
+
+```json
+{
+  "mitte_x": "-0.75",
+  "mitte_y": "0",
+  "breite": "3.5",
+  "groesse": "fullhd"
+}
+```
+
+Mittelpunkt und Bildbreite stehen in Anführungszeichen, damit keine
+Nachkommastelle verloren geht. Weitere Angaben wie `abbruchgrenze`,
+`palette`, `elternbild` und `serie` stehen in
+[specs/stufe-3-fachlich.md](specs/stufe-3-fachlich.md).
+
+| Befehl | Was er tut |
+| --- | --- |
+| `python -m mandelbrot arbeiter` | Arbeitet die Warteschlange ab, bis Strg+C gedrückt wird. |
+| `python -m mandelbrot arbeiter --einmal` | Rechnet alle wartenden Jobs und endet dann. |
+| `python -m mandelbrot server` | Startet nur den Job-Server und nennt die Adressen, unter denen er im Heimnetz erreichbar ist. |
+| `python -m mandelbrot start` | Startet Arbeiter und Job-Server zusammen. Mit Strg+C enden beide. |
+| `python -m mandelbrot autostart an` | Lässt beide unter Windows beim Anmelden von selbst anlaufen. Mit `aus` wieder abschalten, ohne Angabe den Stand zeigen. |
+
+Die Ergebnisse liegen unter `_ERGEBNISSE/<Jobname>/`, gescheiterte Jobs mit
+ihrem Grund unter `_JOBS/fehler/`, das Protokoll unter `_EVENTS/`. Die
+Ordnernamen lassen sich ändern: `mandelbrot.beispiel.toml` nach
+`mandelbrot.toml` kopieren und anpassen.
+
+Der Job-Server ist im Heimnetz ohne Anmeldung erreichbar, zum Beispiel vom
+iPad. `start` und `server` geben die Adresse aus, etwa
+`http://192.168.178.20:8000/docs`. Dort liegt eine Testseite, auf der sich
+alle Aufrufe ausprobieren lassen: Job anlegen, Stand abfragen, Ergebnisse
+und Bilder abrufen. Sie ersetzt bis Stufe 4 die Bedienoberfläche. Das
+Gerät, das die Testseite öffnet, braucht dafür eine Internetverbindung.
+
+| Aufruf | Zweck |
+| --- | --- |
+| `GET /api/zustand` | Zahl der Jobs je Stand, Zahl der Ergebnisse, läuft der Arbeiter |
+| `POST /api/jobs` | Job anlegen, mit den Angaben wie in der Job-Datei und freiwillig `name` |
+| `GET /api/jobs`, `GET /api/jobs/{name}` | Jobs mit Stand, bei gescheiterten mit dem Grund |
+| `GET /api/ergebnisse`, `GET /api/ergebnisse/{name}` | Ergebnisse und ihre Beschreibung |
+| `GET /api/ergebnisse/{name}/bild.png` | das Bild |
+
+Beim ersten Start fragt die Windows-Firewall vermutlich, ob Python im Netz
+erreichbar sein darf. Für private Netze erlauben, sonst kommt das iPad
+nicht durch. Die Portnummer 8000 lässt sich in `mandelbrot.toml` ändern.
+
+Nach einem `git pull` auf diesen Stand einmal die neuen Pakete
+installieren: `python -m pip install -r requirements.txt`.
+
 ### Ein tiefes Bild zur Abnahme von Stufe 2a
 
 Dieser Befehl rechnet ein Bild mit 10⁻¹² Bildbreite in 2560 × 1440. Auf dem
@@ -141,7 +195,10 @@ python -m mandelbrot berechne --mitte-x=-0.743643887037151 --mitte-y=0.131825904
 
 Stufe 0 (Fundament) ist abgenommen. Stufe 1 (Portierung der Pipeline nach
 Python) und Stufe 2a (Bildgrößen und freier Ausschnitt) sind gebaut und
-warten auf die Abnahme. Die Specs liegen in [specs/](specs/).
+warten auf die Abnahme. Stufe 3 (Jobs und Server) ist gebaut: Jobs,
+Warteschlange, Arbeiter, Protokoll, Autostart und Job-Server. Auf Richards
+PC stehen noch der Zugriff vom iPad und der Autostart zur Prüfung aus. Die
+Specs liegen in [specs/](specs/).
 
 ## Lizenz
 

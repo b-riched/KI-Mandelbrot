@@ -1,0 +1,6 @@
+Rechenzeit auf dem Prozessor, ganze Menge, Abbruchgrenze 1005
+       hd  1280 x 720     1.1 s
+   fullhd  1920 x 1080     2.4 s
+     wqhd  2560 x 1440     4.5 s
+     ipad  2360 x 1640     3.6 s
+ 1000x700  1000 x 700     0.5 s
