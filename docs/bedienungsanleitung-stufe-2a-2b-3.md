@@ -1,4 +1,4 @@
-# Bedienungsanleitung – KI-Mandelbrot, Entwicklungsstufen 2a, 2b und 3
+# Bedienungsanleitung – KI-Mandelbrot, Entwicklungsstufen 2a und 3
 
 **Version:** 0.2.0  
 **Stand:** 18.11.2026  
