@@ -1,12 +1,12 @@
 # Stufe 3: Jobs und Server – technische Spec
 
 Status: freigegeben von Thorsten am 16.11.2026. Richard gibt mit der Übernahme des Pull Requests frei.
-Stand: 23.11.2026. Teil A und Teil B sind gebaut, Teil C ist ein Entwurf, siehe „Stand des Baus"
+Stand: 28.11.2026. Teil A und Teil B sind gebaut, Teil C ist ein Entwurf, siehe „Stand des Baus"
 Übergeordnet: [Stufenkonzept](stufenkonzept.md)
 Gegenstück: [fachliche Spec](stufe-3-fachlich.md)
 Baut auf: [technische Spec Stufe 2a](stufe-2a-technisch.md)
 
-Die Regeln R17 bis R27 und die Abnahmekriterien C1 bis C10 stehen in der
+Die Regeln R17 bis R27 und die Abnahmekriterien C1 bis C11 stehen in der
 fachlichen Spec. Was Teil C ändert, steht gesammelt unter „Teil C:
 geplante Jobs".
 
@@ -271,6 +271,7 @@ Windows gibt.
 | C8 | `python -m pytest` |
 | C9 | `git tag stufe-3` nach der Abnahme |
 | C10 | `test_arbeiter`, `test_server`, `test_abnahme_3`, dazu einmal über die Testseite auf Richards PC |
+| C11 | `test_jobs`, `test_abnahme_3` |
 
 ## Stand des Baus
 
@@ -281,11 +282,13 @@ Stufe 3 ist in zwei Teilen gebaut, weil in der Bauumgebung zunächst
 | --- | --- | --- |
 | A | `einstellungen`, `jobs`, `warteschlange`, `protokoll`, `arbeiter`, `autostart`, Befehle `arbeiter` und `autostart`, die Tests dazu | gebaut und getestet am 16.11.2026 |
 | B | `server`, Befehle `server` und `start`, `test_server`, `test_abnahme_3`, neue Abhängigkeiten in `requirements.txt` | gebaut und getestet am 18.11.2026 |
-| C | Stand `geplant` und Freigabe (R27), siehe „Teil C: geplante Jobs" | Spec liegt vor (23.11.2026), Freigabe von H7 bis H9 steht aus |
+| C | Stand `geplant` und Freigabe (R27), Seitenverhältnis (H10), siehe „Teil C: geplante Jobs" | Spec liegt vor (23.11. und 28.11.2026), Freigabe von H7 bis H10 steht aus |
 
 Mit Teil B gibt es den Befehl `start`, den die Autostart-Datei aufruft.
-Stufe 3 kommt nach `main`, wenn auch Teil C gebaut ist. Auf Richards PC
-noch zu prüfen: C4 (iPad), C7 (Autostart), C10 und die Punkte T7 und T8.
+Teil A und B sind am 27.11.2026 nach `main` gekommen, mit der Marke
+`stufe-3` als Teilabnahme. Die volle Abnahme folgt nach Teil C. Auf
+Richards PC noch zu prüfen: C3, C4 (iPad), C7 (Autostart), C10, C11 und die
+Punkte T7 und T8.
 
 ### Präzisierungen beim Bauen von Teil A
 
@@ -349,8 +352,8 @@ Job-Server meldet den Arbeiter dann als aktiv, bis er neu gestartet wird.
 
 ## Teil C: geplante Jobs (R27)
 
-Entwurf vom 23.11.2026, gebaut wird nach der Freigabe von H7 bis H9. Teil C
-kommt auf denselben Branch `stufe-3-jobs`.
+Entwurf vom 23.11.2026, ergänzt am 28.11.2026 um H10. Gebaut wird nach der
+Freigabe von H7 bis H10, auf dem Branch `stufe-3-teil-c`.
 
 ### Ordner und Einstellungen
 
@@ -368,6 +371,19 @@ kommt auf denselben Branch `stufe-3-jobs`.
 - `POST /api/jobs` weist `freigegeben` ab wie `angelegt`.
 - `geplant` steht nur in der Anfrage, wie `name`. In der Datei ist es
   nicht erlaubt, weil der Ordner den Stand angibt.
+
+### Seitenverhältnis (H10)
+
+- `jobs.pruefe` vergleicht bei einem Job mit Elternbild und angegebener
+  Bildgröße die Seitenverhältnisse ganzzahlig: `breite × eltern_hoehe ==
+  eltern_breite × hoehe`. Die Größe des Elternbildes steht als `raster` in
+  dessen `lauf.json`.
+- Kein Spielraum für Rundung. `hd` (1280 × 720) passt unter `fullhd`
+  (1920 × 1080), `ipad` (2360 × 1640) nicht.
+- Meldung, zum Beispiel: „Die Bildgröße 2360x1640 hat ein anderes
+  Seitenverhältnis als das Elternbild 'gesamt' (1920x1080).“
+- Weil `jobs.pruefe` überall benutzt wird, greift die Regel beim Anlegen,
+  bei der Freigabe und im Arbeiter ohne weiteren Code.
 
 ### Reihenfolge (H8)
 
@@ -410,13 +426,18 @@ erweitert.
 | Test | Prüft | Kriterium |
 | --- | --- | --- |
 | `test_warteschlange` | Reihenfolge nach `freigegeben`, `geplant` zählt bei vergebenen Namen, `naechster` und `raeume_auf` lassen `geplant` liegen | R20, R27 |
-| `test_jobs` | `freigegeben` ist erlaubt, `geplant` in der Datei nicht | R18 |
+| `test_jobs` | `freigegeben` ist erlaubt, `geplant` in der Datei nicht. Seitenverhältnis gleich, verschieden, ohne Bildgröße, ohne Elternbild | R18, R19, C11 |
 | `test_arbeiter` | ein Job in `geplant` wird nicht gerechnet, auch nicht nach Neustart | R27, C10 |
 | `test_server` | Anlegen mit und ohne `geplant`, falscher Wert für `geplant`, Freigabe mit Erfolg, mit gescheiterter Prüfung, für unbekannten Job und für jeden anderen Stand, Zustand mit `geplant`, Protokoll | R24, R27, C10 |
-| `test_abnahme_3` | zusätzlich ein geplanter Job: Er bleibt nach `arbeiter --einmal` liegen, wird freigegeben und beim zweiten Lauf gerechnet | C10 |
+| `test_abnahme_3` | zusätzlich ein geplanter Job: Er bleibt nach `arbeiter --einmal` liegen, wird freigegeben und beim zweiten Lauf gerechnet. Ein Ausschnitt in anderem Seitenverhältnis wird abgewiesen | C10, C11 |
 
 Tests aus Teil A und B werden nur dort angepasst, wo sie die Zahl der
-Stände festschreiben, etwa die Antwort von `/api/zustand`. Tests aus den
+Stände festschreiben, etwa die Antwort von `/api/zustand`, oder wo sie
+eine Bildgröße in anderem Seitenverhältnis als das Elternbild erlauben.
+Das betrifft in `test_jobs` mindestens `test_alle_angaben` und
+`test_r19_angegebene_groesse_gilt_auch_mit_elternbild`: Dort bekommt das
+Elternbild ein passendes Raster oder der Job eine passende Größe. Was die
+Tests prüfen, bleibt gleich. Tests aus den
 Stufen 1 und 2a bleiben unverändert (C8).
 
 ### Dokumentation

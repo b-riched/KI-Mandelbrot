@@ -1,7 +1,7 @@
 # Stufe 3: Jobs und Server – fachliche Spec
 
-Status: freigegeben von Thorsten am 16.11.2026. Richard hat die Entscheidungen H1 bis H6 am 18.11.2026 freigegeben. Teil C (R27, H7 bis H9, C10) ist ein Entwurf vom 23.11.2026 und wartet auf die Freigabe.
-Stand: 23.11.2026
+Status: freigegeben von Thorsten am 16.11.2026. Richard hat die Entscheidungen H1 bis H6 am 18.11.2026 freigegeben. Teil C (R27, Ergänzung zu R19, H7 bis H10, C10, C11) ist ein Entwurf vom 23.11.2026, ergänzt am 28.11.2026, und wartet auf die Freigabe.
+Stand: 28.11.2026
 Übergeordnet: [Stufenkonzept](stufenkonzept.md)
 Gegenstück: [technische Spec](stufe-3-technisch.md)
 Baut auf: [Stufe 2a](stufe-2a-fachlich.md)
@@ -91,6 +91,19 @@ Das ist Richards Entscheidung aus dem Stufenkonzept:
   Elternbildes.
 - Ist keine angegeben und gibt es kein Elternbild, ist der Job fehlerhaft.
   Über den Job-Server wird er gar nicht erst angelegt.
+
+Ergänzung aus Teil C (H10, Vorschlag vom 28.11.2026): Das Stufenkonzept vom
+22.11.2026 legt fest, dass ein abgeleitetes Bild immer dasselbe
+Seitenverhältnis hat wie sein Elternbild.
+
+- Hat ein Job ein Elternbild und ist eine Bildgröße angegeben, muss sie
+  dasselbe Seitenverhältnis haben wie das Elternbild. Sonst ist der Job
+  fehlerhaft. Die Meldung nennt beide Größen.
+- Ohne Bildgröße gilt weiter die Größe des Elternbildes.
+- Ohne Elternbild ist jede Bildgröße erlaubt.
+- Schon vorhandene Ergebnisse und Jobs in `fertig` und `fehler` bleiben,
+  wie sie sind. Die Regel gilt beim Anlegen, bei der Freigabe (R27) und
+  wenn der Arbeiter einen Job aufnimmt.
 
 ### R20 Reihenfolge
 
@@ -228,14 +241,15 @@ Unterordnern kommt `geplant` (R27).
 
 ### Entscheidungen zu Teil C
 
-Vorschläge vom 23.11.2026. Sie warten auf die Freigabe durch Thorsten und
-Richard.
+Vorschläge vom 23.11.2026, H10 vom 28.11.2026. Sie warten auf die
+Freigabe durch Thorsten und Richard.
 
 | Nr. | Frage | Vorschlag |
 | --- | --- | --- |
 | H7 | Wohin legt der Job-Server einen neuen Job, wenn die Anfrage nichts dazu sagt? | Nach `neu`, also gleich in die Warteschlange, wie bisher. Mit der Angabe `"geplant": true` landet er in `geplant`. So bleiben Testseite und bisherige Abläufe gleich. Der MandelManager schickt ab Stufe 4 immer `"geplant": true`. |
 | H8 | Wann reiht sich ein freigegebener Job in die Warteschlange ein? | Zum Zeitpunkt der Freigabe. Sonst überholt ein vor Tagen geplanter Job alle Jobs, die schon warten. |
 | H9 | Lässt sich ein geplanter Job über den Job-Server verwerfen? | Nicht in Stufe 3. Bis dahin löscht man die Datei in `_JOBS/geplant` von Hand. Den Aufruf bekommt der MandelManager in Stufe 4, wenn er ihn braucht. |
+| H10 | Wo wird das gleiche Seitenverhältnis von Elternbild und abgeleitetem Bild geprüft? | Verbindlich in Stufe 3, beim Prüfen jedes Jobs (Ergänzung zu R19). Jobs entstehen auch als Datei und über die Testseite, und Stufe 6 verlässt sich auf gleiche Seitenverhältnisse in einer Serie. Der MandelManager stellt in Stufe 4 nur die passende Größe voreingestellt bereit. Frage A3 aus `docs/entwicklungsuebernahme-fragen.md`. |
 
 ## Abnahme
 
@@ -259,6 +273,10 @@ Richard.
       freigegeben ist, und nach der Freigabe läuft er. Das Kriterium kommt
       aus dem Stufenkonzept vom 22.11.2026. Die Marke nach C9 wird erst
       gesetzt, wenn auch C10 erfüllt ist.
+- [ ] **C11** Ein Job mit Elternbild und einer Bildgröße in anderem
+      Seitenverhältnis wird abgewiesen, mit beiden Größen in der Meldung.
+      Mit gleichem Seitenverhältnis, etwa `hd` unter `fullhd`, wird er
+      angelegt (H10).
 
 ## Ergebnis für die nächsten Stufen
 
