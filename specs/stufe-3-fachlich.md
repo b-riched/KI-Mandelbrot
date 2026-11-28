@@ -1,7 +1,7 @@
 # Stufe 3: Jobs und Server – fachliche Spec
 
-Status: freigegeben von Thorsten am 16.11.2026. Richard hat die Entscheidungen H1 bis H6 am 18.11.2026 freigegeben.
-Stand: 18.11.2026
+Status: freigegeben von Thorsten am 16.11.2026. Richard hat die Entscheidungen H1 bis H6 am 18.11.2026 freigegeben. Teil C (R27, Ergänzung zu R19, H7 bis H10, C10, C11) ist ein Entwurf vom 23.11.2026, ergänzt am 28.11.2026, und wartet auf die Freigabe.
+Stand: 28.11.2026
 Übergeordnet: [Stufenkonzept](stufenkonzept.md)
 Gegenstück: [technische Spec](stufe-3-technisch.md)
 Baut auf: [Stufe 2a](stufe-2a-fachlich.md)
@@ -36,10 +36,13 @@ vom iPad. Eine Bedienoberfläche gibt es noch nicht, die kommt in Stufe 4.
    fertig, welche sind gescheitert und warum.
 4. **Ergebnisse abrufen.** Bild und Beschreibung jedes fertigen Jobs.
 5. **Nachlesen, was geschehen ist.** Im Protokoll.
+6. **Einen Job vormerken und später starten.** Ein geplanter Job wartet,
+   bis er freigegeben wird. Erst dann kommt er in die Warteschlange.
 
 ## Fachregeln
 
-Die Regeln R1 bis R16 gelten weiter. Neu sind R17 bis R26.
+Die Regeln R1 bis R16 gelten weiter. Neu sind R17 bis R27. R27 ist am
+23.11.2026 mit dem überarbeiteten Stufenkonzept dazugekommen (Teil C).
 
 ### R17 Ordner
 
@@ -47,6 +50,7 @@ Alle Ordner liegen im Projektordner auf dem Server.
 
 | Ordner | Inhalt |
 | --- | --- |
+| `_JOBS/geplant` | vorgemerkte Jobs, die noch nicht gerechnet werden (R27) |
 | `_JOBS/neu` | Jobs, die auf die Berechnung warten |
 | `_JOBS/laeuft` | der Job, der gerade gerechnet wird |
 | `_JOBS/fertig` | gerechnete Jobs |
@@ -88,11 +92,26 @@ Das ist Richards Entscheidung aus dem Stufenkonzept:
 - Ist keine angegeben und gibt es kein Elternbild, ist der Job fehlerhaft.
   Über den Job-Server wird er gar nicht erst angelegt.
 
+Ergänzung aus Teil C (H10, Vorschlag vom 28.11.2026): Das Stufenkonzept vom
+22.11.2026 legt fest, dass ein abgeleitetes Bild immer dasselbe
+Seitenverhältnis hat wie sein Elternbild.
+
+- Hat ein Job ein Elternbild und ist eine Bildgröße angegeben, muss sie
+  dasselbe Seitenverhältnis haben wie das Elternbild. Sonst ist der Job
+  fehlerhaft. Die Meldung nennt beide Größen.
+- Ohne Bildgröße gilt weiter die Größe des Elternbildes.
+- Ohne Elternbild ist jede Bildgröße erlaubt.
+- Schon vorhandene Ergebnisse und Jobs in `fertig` und `fehler` bleiben,
+  wie sie sind. Die Regel gilt beim Anlegen, bei der Freigabe (R27) und
+  wenn der Arbeiter einen Job aufnimmt.
+
 ### R20 Reihenfolge
 
 - Es läuft immer nur ein Job.
 - Der Arbeiter nimmt den ältesten Job aus `_JOBS/neu`. Maßgeblich ist der
-  Zeitpunkt, zu dem der Job angelegt wurde.
+  Zeitpunkt, zu dem der Job angelegt wurde. Bei einem freigegebenen Job
+  zählt der Zeitpunkt der Freigabe (R27).
+- Jobs in `_JOBS/geplant` fasst der Arbeiter nicht an.
 - Eine Datei, die gerade erst geschrieben wird, bleibt zwei Sekunden
   liegen, bevor der Arbeiter sie anfasst.
 
@@ -131,8 +150,10 @@ entfernt.
 Der Job-Server ist im Heimnetz unter der Adresse des PCs erreichbar, ohne
 Anmeldung. Er kann:
 
-- einen Job anlegen. Ein fehlerhafter Job wird mit einer Meldung
-  abgewiesen und nicht angelegt.
+- einen Job anlegen, wahlweise gleich in die Warteschlange oder als
+  geplanten Job. Ein fehlerhafter Job wird mit einer Meldung abgewiesen und
+  nicht angelegt.
+- einen geplanten Job freigeben (R27).
 - alle Jobs mit ihrem Stand auflisten und einen einzelnen Job zeigen, bei
   gescheiterten mit dem Grund.
 - alle Ergebnisse auflisten.
@@ -150,12 +171,32 @@ Das Protokoll liegt in `_EVENTS`, eine Textdatei pro Tag. Jede Zeile nennt
 Zeitpunkt, Jobname, Ereignis und einen kurzen Text. Festgehalten werden:
 
 - Job angelegt (über den Job-Server) oder entdeckt (als Datei abgelegt),
+- geplanter Job freigegeben,
 - Job gestartet,
 - Job fertig, mit Rechenzeit,
 - Job gescheitert, mit Grund,
 - Job nach einem Neustart zurückgestellt,
 - Warnungen nach R15,
 - Start und Ende von Arbeiter und Job-Server.
+
+### R27 Geplante Jobs
+
+Das ist die Ergänzung aus dem Stufenkonzept vom 22.11.2026. Der
+MandelManager in Stufe 4 legt einen gewählten Ausschnitt zuerst als
+geplanten Job an. Erst „Starten" schickt ihn in die Warteschlange.
+
+- Ein geplanter Job liegt in `_JOBS/geplant`. Er ist ein vollständiger Job
+  nach R18 und R19 und wird beim Anlegen genauso geprüft.
+- Der Arbeiter rechnet ihn nicht. Er bleibt liegen, bis er freigegeben
+  wird, auch über Neustarts hinweg.
+- Die Freigabe schiebt ihn nach `_JOBS/neu`. Vorher wird er noch einmal
+  nach R18, R19 und R15 geprüft. Scheitert die Prüfung, bleibt er in
+  `geplant`, und die Freigabe meldet den Grund.
+- Nur ein Job in `geplant` lässt sich freigeben. Für einen Job in einem
+  anderen Stand meldet die Freigabe, wo er gerade liegt.
+- Wer eine Datei von Hand von `geplant` nach `neu` verschiebt, gibt sie
+  damit ebenfalls frei. Im Protokoll fehlt dann der Eintrag „freigegeben".
+- Ein geplanter Job belegt seinen Namen wie jeder andere Job (R18).
 
 ### R26 Starten und Autostart
 
@@ -168,7 +209,8 @@ Zeitpunkt, Jobname, Ereignis und einen kurzen Text. Festgehalten werden:
 ## Nicht in dieser Stufe
 
 - Bedienoberfläche, Galerie, Ausschnittwahl (Stufe 4).
-- Jobs abbrechen, löschen oder umsortieren.
+- Jobs abbrechen, löschen oder umsortieren. Das gilt auch für geplante
+  Jobs (H9).
 - Mehrere Arbeiter gleichzeitig, mehrere PCs.
 - Anmeldung und Zugriff von außerhalb des Heimnetzes.
 - Rechnen auf der Grafikkarte (Stufe 2b). Der Arbeiter benutzt sie später
@@ -194,6 +236,21 @@ einstellbar.
 | H5 | Unter welcher Portnummer läuft der Job-Server? | 8000, einstellbar. |
 | H6 | Wie soll der Autostart arbeiten? | Über den Autostart-Ordner von Windows, also beim Anmelden. Voraussetzung: Das Laufwerk X: ist dann schon verbunden. |
 
+H2 ist mit dem Stufenkonzept vom 22.11.2026 überholt: Zu den vier
+Unterordnern kommt `geplant` (R27).
+
+### Entscheidungen zu Teil C
+
+Vorschläge vom 23.11.2026, H10 vom 28.11.2026. Sie warten auf die
+Freigabe durch Thorsten und Richard.
+
+| Nr. | Frage | Vorschlag |
+| --- | --- | --- |
+| H7 | Wohin legt der Job-Server einen neuen Job, wenn die Anfrage nichts dazu sagt? | Nach `neu`, also gleich in die Warteschlange, wie bisher. Mit der Angabe `"geplant": true` landet er in `geplant`. So bleiben Testseite und bisherige Abläufe gleich. Der MandelManager schickt ab Stufe 4 immer `"geplant": true`. |
+| H8 | Wann reiht sich ein freigegebener Job in die Warteschlange ein? | Zum Zeitpunkt der Freigabe. Sonst überholt ein vor Tagen geplanter Job alle Jobs, die schon warten. |
+| H9 | Lässt sich ein geplanter Job über den Job-Server verwerfen? | Nicht in Stufe 3. Bis dahin löscht man die Datei in `_JOBS/geplant` von Hand. Den Aufruf bekommt der MandelManager in Stufe 4, wenn er ihn braucht. |
+| H10 | Wo wird das gleiche Seitenverhältnis von Elternbild und abgeleitetem Bild geprüft? | Verbindlich in Stufe 3, beim Prüfen jedes Jobs (Ergänzung zu R19). Jobs entstehen auch als Datei und über die Testseite, und Stufe 6 verlässt sich auf gleiche Seitenverhältnisse in einer Serie. Der MandelManager stellt in Stufe 4 nur die passende Größe voreingestellt bereit. Frage A3 aus `docs/entwicklungsuebernahme-fragen.md`. |
+
 ## Abnahme
 
 - [ ] **C1** Eine von Hand in `_JOBS/neu` gelegte Job-Datei wird gerechnet.
@@ -212,12 +269,20 @@ einstellbar.
       Nach dem Anmelden laufen Arbeiter und Job-Server von selbst.
 - [ ] **C8** Alle Tests aus den Stufen 1 und 2a laufen unverändert durch.
 - [ ] **C9** Der Stand trägt die Marke `stufe-3`.
+- [ ] **C10** Ein Job in `_JOBS/geplant` wird nicht gerechnet, bevor er
+      freigegeben ist, und nach der Freigabe läuft er. Das Kriterium kommt
+      aus dem Stufenkonzept vom 22.11.2026. Die Marke nach C9 wird erst
+      gesetzt, wenn auch C10 erfüllt ist.
+- [ ] **C11** Ein Job mit Elternbild und einer Bildgröße in anderem
+      Seitenverhältnis wird abgewiesen, mit beiden Größen in der Meldung.
+      Mit gleichem Seitenverhältnis, etwa `hd` unter `fullhd`, wird er
+      angelegt (H10).
 
 ## Ergebnis für die nächsten Stufen
 
 - **Stufe 4** findet einen Job-Server vor, über den die Web-App Jobs
-  anlegt, den Stand abfragt und Bilder lädt. Jedes Ergebnis kennt sein
-  Elternbild.
+  plant, freigibt, den Stand abfragt und Bilder lädt. Jedes Ergebnis kennt
+  sein Elternbild.
 - **Stufe 2b** tauscht nur den Rechenkern. Jobs, Arbeiter und Job-Server
   bleiben, wie sie sind.
 - **Stufe 6** kann zusammengehörige Jobs über die Serie finden.
